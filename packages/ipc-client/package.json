@@ -1,0 +1,33 @@
+{
+  "name": "@myocr/ipc-client",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./database": {
+      "import": "./src/dbService.ts",
+      "types": "./src/dbService.ts"
+    },
+    "./ai": {
+      "import": "./src/aiService.ts",
+      "types": "./src/aiService.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@myocr/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "typescript": "~5.9.3"
+  }
+}
