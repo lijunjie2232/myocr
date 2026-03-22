@@ -1,0 +1,24 @@
+{
+  "name": "@myocr/electron",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/main.cjs",
+  "scripts": {
+    "build": "node build.config.js",
+    "watch": "node build.config.js --watch",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "@myocr/ai-core": "workspace:*",
+    "@myocr/database": "workspace:*",
+    "@myocr/types": "workspace:*",
+    "better-sqlite3": "^12.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.0",
+    "electron": "41.0.2",
+    "esbuild": "^0.25.0",
+    "esbuild-register": "^3.6.0",
+    "typescript": "~5.9.3"
+  }
+}
