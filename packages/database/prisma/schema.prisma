@@ -1,0 +1,266 @@
+// MyOCR Prisma Schema
+// Migration from SQLite to Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ============================================================================
+// CORE BUSINESS MODELS
+// ============================================================================
+
+// 1. LLM Server APIs Configuration
+model LlmServerApi {
+  id         String   @id
+  name       String
+  provider   String   // 'openai' | 'anthropic' | 'ollama' | 'custom'
+  baseUrl    String?  @map("base_url")
+  apiKey     String   @map("api_key")
+  models     String   // JSON array of model names
+  isEnabled  Boolean  @default(true) @map("is_enabled")
+  sortOrder  Int      @default(0) @map("sort_order")
+  metadata   String?  // JSON field for extensibility
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  ocrTasks       OcrTask[]       @relation("OcrTaskApiConfig")
+  summaryTasks   SummaryTask[]   @relation("SummaryTaskApiConfig")
+
+  @@index([isEnabled])
+  @@index([provider])
+  @@index([sortOrder])
+  @@map("llm_server_apis")
+}
+
+// 2. OCR Directories
+model OcrDirectory {
+  id          String   @id
+  name        String   @unique
+  description String?
+  metadata    String?  // JSON field for extensibility
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tasks OcrTask[]
+
+  @@map("ocr_directories")
+}
+
+// 3. OCR Tasks
+model OcrTask {
+  id            String   @id
+  directoryId   String   @map("directory_id")
+  name          String
+  status        String   @default("pending") // 'pending' | 'processing' | 'completed' | 'failed'
+  
+  // Image storage: Bytes format
+  imageBlob     Bytes    @map("image_blob")  // Image binary data
+  imageMimeType String   @default("image/png") @map("image_mime_type")
+  imageFilename String?  @map("image_filename")
+  
+  // OCR result
+  result        String?
+  errorMessage  String?  @map("error_message")
+  
+  // API configuration
+  apiConfigId   String?  @map("api_config_id")
+  selectedModel String?  @map("selected_model")
+  
+  // Processing parameters
+  temperature   Float?   @default(0.6)
+  maxTokens     Int?     @default(2000) @map("max_tokens")
+  customPrompt  String?  @map("custom_prompt")
+  
+  // Metadata
+  metadata      String?  // JSON field for additional data
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  directory      OcrDirectory   @relation(fields: [directoryId], references: [id], onDelete: Cascade)
+  apiConfig      LlmServerApi?  @relation("OcrTaskApiConfig", fields: [apiConfigId], references: [id], onDelete: SetNull)
+  executionLogs  TaskExecutionLog[]
+  attachments    FileAttachment[]
+
+  @@index([directoryId])
+  @@index([status])
+  @@index([apiConfigId])
+  @@index([createdAt])
+  @@map("ocr_tasks")
+}
+
+// 4. Summary Directories
+model SummaryDirectory {
+  id          String   @id
+  name        String   @unique
+  description String?
+  metadata    String?  // JSON field for extensibility
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tasks SummaryTask[]
+
+  @@map("summary_directories")
+}
+
+// 5. Summary Tasks
+model SummaryTask {
+  id            String   @id
+  directoryId   String   @map("directory_id")
+  name          String
+  status        String   @default("pending") // 'pending' | 'processing' | 'completed' | 'failed'
+  
+  // Input content: Long text storage
+  inputText     String   @map("input_text")
+  
+  // Summary result
+  result        String?
+  errorMessage  String?  @map("error_message")
+  
+  // API configuration
+  apiConfigId   String?  @map("api_config_id")
+  selectedModel String?  @map("selected_model")
+  
+  // Processing parameters
+  temperature   Float?   @default(0.6)
+  maxTokens     Int?     @default(2000) @map("max_tokens")
+  customPrompt  String?  @map("custom_prompt")
+  resultFormat  String?  @default("plaintext") @map("result_format") // 'plaintext' | 'json' | 'jsonp' | 'yaml' | 'xml'
+  
+  // Metadata
+  metadata      String?  // JSON field for additional data
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  directory      SummaryDirectory @relation(fields: [directoryId], references: [id], onDelete: Cascade)
+  apiConfig      LlmServerApi?    @relation("SummaryTaskApiConfig", fields: [apiConfigId], references: [id], onDelete: SetNull)
+  executionLogs  TaskExecutionLog[]
+  attachments    FileAttachment[]
+
+  @@index([directoryId])
+  @@index([status])
+  @@index([apiConfigId])
+  @@index([createdAt])
+  @@index([resultFormat])
+  @@map("summary_tasks")
+}
+
+// 6. Prompt Directories
+model PromptDirectory {
+  id          String   @id
+  name        String   @unique
+  description String?
+  metadata    String?  // JSON field for extensibility
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  prompts Prompt[]
+
+  @@map("prompt_directories")
+}
+
+// 7. Prompts (Template Management)
+model Prompt {
+  id          String   @id
+  directoryId String   @map("directory_id")
+  name        String
+  content     String   // Prompt template content
+  type        String?  @default("custom") // 'custom' | 'system' | 'user'
+  category    String?
+  variables   String   @default("[]") // JSON array of variable definitions
+  description String?
+  isPublic    Boolean  @default(false) @map("is_public")
+  usageCount  Int      @default(0) @map("usage_count")
+  isFavorite  Boolean  @default(false) @map("is_favorite")
+  version     Int      @default(1)
+  parentId    String?  @map("parent_id") // For versioning
+  
+  metadata    String?  // JSON field for additional data
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  directory      PromptDirectory @relation(fields: [directoryId], references: [id], onDelete: Cascade)
+  parent         Prompt?         @relation("PromptVersions", fields: [parentId], references: [id], onDelete: SetNull)
+  children       Prompt[]        @relation("PromptVersions")
+  executionLogs  TaskExecutionLog[]
+  attachments    FileAttachment[]
+
+  @@index([directoryId])
+  @@index([type])
+  @@index([category])
+  @@index([isPublic])
+  @@index([isFavorite])
+  @@index([parentId])
+  @@map("prompts")
+}
+
+// ============================================================================
+// AUXILIARY MODELS
+// ============================================================================
+
+// 8. App Settings
+model AppSetting {
+  key         String   @id
+  value       String   // JSON string
+  description String?
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}
+
+// 9. Task Execution Logs
+model TaskExecutionLog {
+  id        String   @id
+  taskId    String   @map("task_id")
+  taskType  String   @map("task_type") // 'ocr' | 'summary' | 'prompt'
+  action    String   // e.g., 'started', 'completed', 'failed', 'api_call'
+  message   String?  // Log message
+  details   String?  // JSON field for additional details
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations - polymorphic, can reference any task table
+  ocrTask      OcrTask?      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  summaryTask  SummaryTask?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  prompt       Prompt?       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([taskType])
+  @@index([action])
+  @@index([createdAt])
+  @@map("task_execution_logs")
+}
+
+// 10. File Attachments (Optional Extension)
+model FileAttachment {
+  id        String   @id
+  taskId    String   @map("task_id")
+  taskType  String   @map("task_type") // 'ocr' | 'summary' | 'prompt'
+  fileName  String   @map("file_name")
+  fileType  String   @map("file_type") // MIME type
+  fileSize  Int      @map("file_size") // Size in bytes
+  fileHash  String?  @map("file_hash") // SHA256 hash for deduplication
+  fileBlob  Bytes    @map("file_blob") // File binary data
+  
+  metadata  String?  // JSON field for additional data
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations - polymorphic, can reference any task table
+  ocrTask      OcrTask?      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  summaryTask  SummaryTask?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  prompt       Prompt?       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([taskType])
+  @@index([fileHash])
+  @@map("file_attachments")
+}
