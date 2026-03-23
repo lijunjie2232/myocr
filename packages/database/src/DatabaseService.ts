@@ -388,16 +388,34 @@ export class DatabaseService {
     if (updates.usageCount !== undefined) updateData.usageCount = updates.usageCount;
     if (updates.metadata !== undefined) updateData.metadata = updates.metadata ? JSON.stringify(updates.metadata) : null;
     
-    await this.prisma.prompt.update({
-      where: { id },
-      data: updateData,
-    });
+    try {
+      await this.prisma.prompt.update({
+        where: { id },
+        data: updateData,
+      });
+    } catch (error: any) {
+      // If record not found, just log warning and skip update
+      if (error.code === 'P2025') {
+        console.warn('[DatabaseService.updatePrompt] Prompt not found, skipping update:', id);
+        return;
+      }
+      throw error;
+    }
   }
 
   async deletePrompt(id: string): Promise<void> {
-    await this.prisma.prompt.delete({
-      where: { id },
-    });
+    try {
+      await this.prisma.prompt.delete({
+        where: { id },
+      });
+    } catch (error: any) {
+      // If record not found, just log warning and skip delete
+      if (error.code === 'P2025') {
+        console.warn('[DatabaseService.deletePrompt] Prompt not found, skipping delete:', id);
+        return;
+      }
+      throw error;
+    }
   }
 
   // ==================== OCR Tasks ====================
@@ -461,10 +479,19 @@ export class DatabaseService {
     if (updates.customPrompt !== undefined) updateData.customPrompt = updates.customPrompt;
     if (updates.metadata !== undefined) updateData.metadata = updates.metadata ? JSON.stringify(updates.metadata) : null;
     
-    await this.prisma.ocrTask.update({
-      where: { id },
-      data: updateData,
-    });
+    try {
+      await this.prisma.ocrTask.update({
+        where: { id },
+        data: updateData,
+      });
+    } catch (error: any) {
+      // If record not found, just log warning and skip update
+      if (error.code === 'P2025') {
+        console.warn('[DatabaseService.updateOcrTask] OCR task not found, skipping update:', id);
+        return;
+      }
+      throw error;
+    }
   }
 
   async getOcrTasksByDirectory(directoryId: string): Promise<any[]> {
@@ -494,6 +521,7 @@ export class DatabaseService {
       
       return {
         ...task,
+        type: 'ocr' as const,
         // Convert blob to data URL for display in img tag
         imageUrl: base64Data && task.imageMimeType 
           ? `data:${task.imageMimeType};base64,${base64Data}`
@@ -506,9 +534,18 @@ export class DatabaseService {
   }
 
   async deleteOcrTask(id: string): Promise<void> {
-    await this.prisma.ocrTask.delete({
-      where: { id },
-    });
+    try {
+      await this.prisma.ocrTask.delete({
+        where: { id },
+      });
+    } catch (error: any) {
+      // If record not found, just log warning and skip delete
+      if (error.code === 'P2025') {
+        console.warn('[DatabaseService.deleteOcrTask] OCR task not found, skipping delete:', id);
+        return;
+      }
+      throw error;
+    }
   }
 
   // ==================== Summary Tasks ====================
@@ -552,10 +589,19 @@ export class DatabaseService {
     if (updates.resultFormat !== undefined) updateData.resultFormat = updates.resultFormat;
     if (updates.metadata !== undefined) updateData.metadata = updates.metadata ? JSON.stringify(updates.metadata) : null;
     
-    await this.prisma.summaryTask.update({
-      where: { id },
-      data: updateData,
-    });
+    try {
+      await this.prisma.summaryTask.update({
+        where: { id },
+        data: updateData,
+      });
+    } catch (error: any) {
+      // If record not found, just log warning and skip update
+      if (error.code === 'P2025') {
+        console.warn('[DatabaseService.updateSummaryTask] Summary task not found, skipping update:', id);
+        return;
+      }
+      throw error;
+    }
   }
 
   async getSummaryTasksByDirectory(directoryId: string): Promise<any[]> {
@@ -566,6 +612,7 @@ export class DatabaseService {
     
     return tasks.map((task: any) => ({
       ...task,
+      type: 'summary' as const,
       metadata: task.metadata ? JSON.parse(task.metadata) : null,
       createdAt: task.createdAt,
       updatedAt: task.updatedAt,
@@ -573,9 +620,18 @@ export class DatabaseService {
   }
 
   async deleteSummaryTask(id: string): Promise<void> {
-    await this.prisma.summaryTask.delete({
-      where: { id },
-    });
+    try {
+      await this.prisma.summaryTask.delete({
+        where: { id },
+      });
+    } catch (error: any) {
+      // If record not found, just log warning and skip delete
+      if (error.code === 'P2025') {
+        console.warn('[DatabaseService.deleteSummaryTask] Summary task not found, skipping delete:', id);
+        return;
+      }
+      throw error;
+    }
   }
 
   // ==================== App State ====================
