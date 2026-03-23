@@ -481,12 +481,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         console.log('Task saved to ocr_tasks table:', newTask.id);
       } else if (newTask.type === 'summary') {
         // Save to summary_tasks table for summary tasks
+        console.log('[AppContext] Creating summary task with inputText:', {
+          taskId: newTask.id,
+          inputTextLength: newTask.inputText?.length || 0,
+          hasInputText: !!newTask.inputText,
+        });
+        
         await dbService.createSummaryTask({
           id: newTask.id,
           directoryId: directoryId,
           name: newTask.name,
           status: newTask.status,
-          inputText: newTask.result || '', // Store input text in result field
+          inputText: newTask.inputText || '', // Store input text from task
           apiConfigId: newTask.apiConfigId,
           selectedModel: newTask.selectedModel,
           temperature: newTask.temperature,
