@@ -1,0 +1,23 @@
+{
+  "appId": "com.myocr.app",
+  "productName": "MyOCR",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "apps/electron/dist/main.cjs",
+    "apps/electron/dist/preload.cjs"
+  ],
+  "mac": {
+    "category": "public.app-category.productivity",
+    "target": ["dmg", "zip"]
+  },
+  "win": {
+    "target": ["nsis", "portable"]
+  },
+  "linux": {
+    "target": ["AppImage", "deb"],
+    "category": "Utility"
+  }
+}
