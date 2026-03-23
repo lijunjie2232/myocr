@@ -1,7 +1,35 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@myocr/types": ["packages/types/index.ts"],
+      "@myocr/ai-core": ["packages/ai-core/src/index.ts"],
+      "@myocr/database": ["packages/database/src/index.ts"],
+      "@myocr/ui-components": ["packages/ui-components/src/index.ts"],
+      "@myocr/ipc-client": ["packages/ipc-client/src/index.ts"]
+    }
+  },
+  "include": [
+    "src",
+    "apps/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "packages"
   ]
 }
