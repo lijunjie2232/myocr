@@ -60,6 +60,7 @@ export interface Task {
   memoryConfig?: { trigger: number; keep: number }; // Memory configuration
   textSplitConfig?: { chunkSize: number; chunkOverlap: number }; // Text split configuration
   resultFormat?: 'plaintext' | 'json' | 'jsonp' | 'yaml' | 'xml'; // Result format for summary tasks
+  metadata?: Record<string, any>; // Metadata for storing processing details
   createdAt: Date;
   updatedAt: Date;
 }
