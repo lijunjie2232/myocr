@@ -33,6 +33,7 @@ import OcrTaskSelectorDialog from './OcrTaskSelectorDialog';
 import PromptTemplateSelectorDialog from './PromptTemplateSelectorDialog';
 import TextEditor from './TextEditor';
 import { useAppContext } from '../context/AppContext';
+import { summaryService } from '@myocr/ipc-client';
 import type { Task } from '@myocr/types';
 
 interface SummaryTaskDialogProps {
@@ -220,15 +221,35 @@ export default function SummaryTaskDialog({ open, onClose, directoryId }: Summar
         textSplitConfig,
       });
 
-      // If add-and-run mode, process with LLM (future enhancement)
+      // If add-and-run mode, process with LLM
       if (uploadMode === 'add-and-run') {
         try {
-          // Note: This will need a summary service similar to ocrService
-          // For now, content is already stored above, just log success
-          console.log(`Summary created for ${taskName}:`, content.substring(0, 50) + '...');
+          // Call summary service through IPC
+          const result = await summaryService.processSummary({
+            text: content,
+            prompt: customPrompt || undefined,
+            apiConfigId: selectedApiId || '',
+            modelId: selectedModel || 'auto',
+            taskId: taskId, // Pass task ID for memory tracking
+            memoryUsage: memoryUsage || 'none',
+            memoryConfig: memoryUsage !== 'none' ? memoryConfig : undefined,
+            textSplitConfig: textSplitConfig,
+            temperature: temperature,
+            maxTokens: maxTokens,
+            resultFormat: resultFormat,
+          });
+          
+          // Update task with result
+          await updateTask(directoryId, taskId, {
+            result: result.summary,
+            status: 'completed',
+            metadata: result.metadata || {},
+          });
+          
+          console.log(`Summary created for ${taskName}:`, result.summary.substring(0, 100) + '...');
         } catch (err) {
           console.error(`Summary processing failed for ${taskName}:`, err);
-          updateTask(directoryId, taskId, {
+          await updateTask(directoryId, taskId, {
             status: 'failed',
             errorMessage: (err as Error).message,
           });
