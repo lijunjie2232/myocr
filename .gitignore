@@ -25,3 +25,7 @@ dist-ssr
 
 # Old project backup
 .example-backup
+
+# build
+dist
+release
