@@ -24,6 +24,7 @@ export interface SummaryRequest {
   prompt?: string;
   apiConfigId?: string;
   modelId?: string;
+  taskId?: string; // Optional task ID for memory tracking
   memoryUsage?: 'none' | 'trimmed' | 'summarized';
   memoryConfig?: {
     trigger: number;
@@ -35,6 +36,7 @@ export interface SummaryRequest {
   };
   temperature?: number;
   maxTokens?: number;
+  resultFormat?: 'plaintext' | 'json' | 'jsonp' | 'yaml' | 'xml';
 }
 
 export interface SummaryResponse {
@@ -135,7 +137,7 @@ export const summaryService = {
     const win = window as Window & typeof globalThis & { electronAPI?: ElectronAPI };
     const result = await win.electronAPI!.summary.processSummary({
       ...request,
-      inputText: request.text,
+      inputText: request.text, // Map text to inputText for backward compatibility
       apiConfigId: request.apiConfigId || '',
     });
 
