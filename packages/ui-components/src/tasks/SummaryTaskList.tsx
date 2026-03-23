@@ -31,6 +31,7 @@ import TextEditor from './TextEditor';
 import SummaryTaskConfigDialog from './SummaryTaskConfigDialog';
 import SummaryTaskDialog from './SummaryTaskDialog';
 import { useAppContext } from '../context/AppContext';
+import { summaryService } from '@myocr/ipc-client';
 import type { Task } from '@myocr/types';
 
 interface SummaryTaskListProps {
@@ -80,6 +81,9 @@ export default function SummaryTaskList({ directoryId }: SummaryTaskListProps) {
       customPrompt: task.customPrompt,
       apiConfigId: task.apiConfigId,
       selectedModel: task.selectedModel,
+      hasInputText: !!task.inputText,
+      inputTextLength: task.inputText?.length || 0,
+      inputTextPreview: task.inputText ? task.inputText.substring(0, 100) + '...' : 'N/A',
     });
 
     // Update task status to processing immediately
@@ -87,28 +91,48 @@ export default function SummaryTaskList({ directoryId }: SummaryTaskListProps) {
     
     try {
       // Get the text content from inputText field
-      if (!task.inputText) {
-        throw new Error('No text content to summarize');
+      if (!task.inputText || task.inputText.trim() === '') {
+        console.error('[SummaryTaskList] Task missing inputText:', {
+          taskId: task.id,
+          taskName: task.name,
+          inputText: task.inputText,
+        });
+        throw new Error('No text content to summarize. Please check if the task was created correctly.');
       }
 
-      // Note: Summary service should be called through Electron IPC
-      // For now, just use the inputText as the result (placeholder)
-      console.log('Summary service not yet implemented - using placeholder');
+      // Call summary service through Electron IPC
+      console.log('Calling summary service via IPC...');
       
-      // Update task with placeholder result
-      await updateTask(directoryId, task.id, {
-        result: 'Summary service not yet implemented - input text length: ' + task.inputText.length,
-        status: 'completed',
+      const result = await summaryService.processSummary({
+        text: task.inputText,
+        prompt: task.customPrompt,
+        apiConfigId: task.apiConfigId || '',
+        modelId: task.selectedModel || 'auto',
+        memoryUsage: task.memoryUsage || 'none',
+        memoryConfig: task.memoryConfig || { trigger: 2, keep: 1 },
+        textSplitConfig: task.textSplitConfig || { chunkSize: 2000, chunkOverlap: 200 },
+        temperature: task.temperature || 0.7,
+        maxTokens: task.maxTokens || -1,
+        resultFormat: task.resultFormat || 'plaintext',
       });
       
-      console.log('✅ Task updated with:', {
+      // Update task with result
+      await updateTask(directoryId, task.id, {
+        result: result.summary,
+        status: 'completed',
+        metadata: result.metadata || {},
+      });
+      
+      console.log('✅ Summary task completed:', {
         taskId: task.id,
         status: 'completed',
-        resultLength: task.inputText.length,
+        resultLength: result.summary.length,
+        model: result.metadata?.model,
+        provider: result.metadata?.provider,
       });
       
-      console.log(`Summary placeholder created for ${task.name}`);
-      console.log('Task inputText preserved:', task.inputText ? 'YES' : 'NO', 'Length:', task.inputText?.length);
+      console.log(`Summary created for ${task.name}`);
+      console.log('Summary preview:', result.summary.substring(0, 200) + '...');
     } catch (err) {
       console.error(`Summary processing failed for ${task.name}:`, err);
       await updateTask(directoryId, task.id, {
@@ -285,7 +309,6 @@ export default function SummaryTaskList({ directoryId }: SummaryTaskListProps) {
                 <TableCell sx={{ minWidth: 250 }}>Task Name</TableCell>
                 <TableCell sx={{ minWidth: 120 }}>Status</TableCell>
                 <TableCell sx={{ minWidth: 200 }}>API / Model</TableCell>
-                <TableCell>Content Preview</TableCell>
                 <TableCell sx={{ minWidth: 150 }}>Created</TableCell>
                 <TableCell sx={{ minWidth: 180 }}>Actions</TableCell>
               </TableRow>
@@ -333,21 +356,6 @@ export default function SummaryTaskList({ directoryId }: SummaryTaskListProps) {
                         {task.selectedModel || 'Auto'}
                       </Typography>
                     </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        whiteSpace: 'pre-wrap',
-                      }}
-                    >
-                      {task.result?.substring(0, 100) || 'No content'}...
-                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="caption" color="text.secondary">
