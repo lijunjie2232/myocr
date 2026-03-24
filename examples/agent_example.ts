@@ -27,16 +27,16 @@ interface AgentOptions {
 
 interface MemoryItem {
   text: string;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
 }
 
 export class LangChainAgent {
-  private model: any; // initChatModel return type
+  private model: unknown; // initChatModel return type
   private splitter: RecursiveCharacterTextSplitter;
   private memory: MemoryItem[] = [];
   private opts: Required<AgentOptions>;
 
-  private constructor(opts: Required<AgentOptions>, model: any) {
+  private constructor(opts: Required<AgentOptions>, model: unknown) {
     this.opts = opts;
     this.model = model;
     this.splitter = new RecursiveCharacterTextSplitter({
@@ -62,7 +62,7 @@ export class LangChainAgent {
     };
 
     // Build init options for initChatModel
-    const initOpts: Record<string, any> = { temperature: defaults.temperature };
+    const initOpts: Record<string, unknown> = { temperature: defaults.temperature };
     if (defaults.maxTokens > 0) {
       initOpts.maxTokens = defaults.maxTokens;
     }
@@ -144,7 +144,7 @@ export class LangChainAgent {
   }
 
   // Convert structured object to requested format
-  private toOutput(obj: any): string {
+  private toOutput(obj: unknown): string {
     const fmt = this.opts.outputFormat;
     if (fmt === "txt") return obj.answer ?? obj; // raw answer text if present
 
@@ -159,7 +159,7 @@ export class LangChainAgent {
 
     if (fmt === "xml") {
       // naive conversion for simple objects (strings, arrays, objects)
-      const toXml = (key: string, value: any): string => {
+      const toXml = (key: string, value: unknown): string => {
         if (value == null) return `<${key}/>`;
         if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
           const esc = String(value)
@@ -182,7 +182,7 @@ export class LangChainAgent {
 
     if (fmt === "yaml") {
       // simple JSON -> YAML converter for basic types
-      const toYaml = (value: any, indent = 0): string => {
+      const toYaml = (value: unknown, indent = 0): string => {
         const pad = "  ".repeat(indent);
         if (value == null) return "null\n";
         if (typeof value === "string") return `${pad}"${value.replace(/"/g, '\\"')}"\n`;
@@ -210,7 +210,7 @@ export class LangChainAgent {
     // 1) split text into chunks
     const rawChunks = await this.splitter.splitText(knowledgeText);
     // rawChunks might be an array of strings or Documents; normalize to strings
-    const chunks: string[] = rawChunks.map((c: any) => (typeof c === "string" ? c : c.pageContent ?? c.text ?? JSON.stringify(c)));
+    const chunks: string[] = rawChunks.map((c: unknown) => (typeof c === "string" ? c : (c as { pageContent?: string; text?: string }).pageContent ?? (c as { text?: string }).text ?? JSON.stringify(c)));
 
     // 2) choose top relevant chunks (simple scoring)
     const scored = chunks.map((c) => ({ text: c, score: this.scoreRelevance(question, c) }));
