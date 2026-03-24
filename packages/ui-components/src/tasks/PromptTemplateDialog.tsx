@@ -49,7 +49,7 @@ export default function PromptTemplateDialog({ open, onClose, directoryId }: Pro
         status: 'completed',
         result: promptContent, // Store prompt content in result field
         ...(templateDescription.trim() && { description: templateDescription.trim() }), // Pass description
-      } as any);
+      });
 
       // Reset form
       setTemplateName('');

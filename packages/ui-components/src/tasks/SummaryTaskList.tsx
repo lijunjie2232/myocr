@@ -120,15 +120,15 @@ export default function SummaryTaskList({ directoryId }: SummaryTaskListProps) {
       await updateTask(directoryId, task.id, {
         result: result.summary,
         status: 'completed',
-        metadata: result.metadata || {},
+        metadata: result.metadata ? (result.metadata as Record<string, unknown>) : undefined,
       });
       
       console.log('✅ Summary task completed:', {
         taskId: task.id,
         status: 'completed',
         resultLength: result.summary.length,
-        model: result.metadata?.model,
-        provider: result.metadata?.provider,
+        model: (result.metadata as any)?.model,
+        provider: (result.metadata as any)?.provider,
       });
       
       console.log(`Summary created for ${task.name}`);
@@ -139,13 +139,6 @@ export default function SummaryTaskList({ directoryId }: SummaryTaskListProps) {
         status: 'failed',
         errorMessage: (err as Error).message,
       });
-    }
-  };
-
-  const handleViewContent = (task: Task) => {
-    // Show input text if available, otherwise show result
-    if (task.inputText || task.result) {
-      setEditingTask(task);
     }
   };
 

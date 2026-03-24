@@ -8,13 +8,6 @@ import {
   Box,
   Typography,
   IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Divider,
   TextField,
   FormControlLabel,
   Checkbox,
@@ -24,12 +17,8 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DownloadIcon from '@mui/icons-material/Download';
 import ViewListIcon from '@mui/icons-material/ViewList';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import SearchIcon from '@mui/icons-material/Search';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ClearIcon from '@mui/icons-material/Clear';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
@@ -64,8 +53,6 @@ export default function TextEditor({
   onSave,
   onExport,
   showSidebar = false,
-  sidebarItems = [],
-  activeItemId,
   isSaving = false,
 }: TextEditorProps) {
   const [isEditing, setIsEditing] = useState(false);

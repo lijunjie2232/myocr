@@ -57,7 +57,7 @@ interface TextSplitConfig {
 }
 
 export default function SummaryTaskDialog({ open, onClose, directoryId }: SummaryTaskDialogProps) {
-  const { createTask, updateTask, llmConfigs, directories } = useAppContext();
+  const { createTask, updateTask, llmConfigs } = useAppContext();
   
   // Form state
   const [taskName, setTaskName] = useState('');
@@ -130,23 +130,6 @@ export default function SummaryTaskDialog({ open, onClose, directoryId }: Summar
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleToggleOcrTask = (taskId: string) => {
-    setSelectedOcrTasks(prev => {
-      if (prev.some(t => t.id === taskId)) {
-        return prev.filter(t => t.id !== taskId);
-      } else {
-        // Need to find the task from directories
-        const task = directories
-          .flatMap(d => d.tasks)
-          .find(t => t.id === taskId);
-        if (task) {
-          return [...prev, task];
-        }
-        return prev;
-      }
-    });
-  };
-
   const handleCreate = async () => {
     if (!taskName.trim()) {
       setError('Please enter a task name');
@@ -173,7 +156,7 @@ export default function SummaryTaskDialog({ open, onClose, directoryId }: Summar
           selectedFiles.map(file => file.text())
         );
         content = contents.join('\n\n---\n\n');
-      } catch (err) {
+      } catch {
         setError('Failed to read text files');
         return;
       }
@@ -243,7 +226,7 @@ export default function SummaryTaskDialog({ open, onClose, directoryId }: Summar
           await updateTask(directoryId, taskId, {
             result: result.summary,
             status: 'completed',
-            metadata: result.metadata || {},
+            metadata: result.metadata ? (result.metadata as Record<string, unknown>) : undefined,
           });
           
           console.log(`Summary created for ${taskName}:`, result.summary.substring(0, 100) + '...');

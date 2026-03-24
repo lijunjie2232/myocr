@@ -22,7 +22,6 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DownloadIcon from '@mui/icons-material/Download';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import SearchIcon from '@mui/icons-material/Search';
@@ -103,7 +102,6 @@ export default function TextContentViewer({
   const scrollToMatch = (index: number) => {
     if (!textContentRef.current || index < 0 || index >= matches.length) return;
 
-    const match = matches[index];
     const element = textContentRef.current.querySelector(`[data-match-index="${index}"]`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });

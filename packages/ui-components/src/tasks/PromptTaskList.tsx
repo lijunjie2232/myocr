@@ -57,7 +57,7 @@ export default function PromptTaskList({ directoryId }: PromptTaskListProps) {
   };
 
   const handleEditName = async (task: Task, newName: string, newDescription?: string) => {
-    const updates: any = { name: newName };
+    const updates: { name: string; description?: string } = { name: newName };
     if (newDescription !== undefined) {
       updates.description = newDescription;
     }
@@ -144,7 +144,7 @@ export default function PromptTaskList({ directoryId }: PromptTaskListProps) {
                         overflow: 'hidden',
                       }}
                     >
-                      {(task as any).description || '—'}
+                      {(task as { description?: string }).description || '—'}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -247,7 +247,7 @@ export default function PromptTaskList({ directoryId }: PromptTaskListProps) {
         label="Template Name"
         defaultValue={editNameTask?.name || ''}
         descriptionLabel="Description"
-        defaultDescription={(editNameTask as any)?.description || ''}
+        defaultDescription={(editNameTask as { description?: string })?.description || ''}
         validate={(value) => {
           if (!value.trim()) {
             return 'Please enter a template name';

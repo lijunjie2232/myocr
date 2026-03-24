@@ -106,11 +106,6 @@ export default function OcrTaskSelectorDialog({ open, onClose, onConfirm }: OcrT
     });
   };
 
-  const handleToggleDirectory = (directoryId: string) => {
-    // This could be implemented to expand/collapse directories
-    // For now, all directories are expanded by default
-  };
-
   const handleSelectAllInDirectory = (directory: DirectoryWithTasks, checked: boolean) => {
     if (checked) {
       // Select all tasks in this directory
