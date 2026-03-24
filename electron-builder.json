@@ -5,19 +5,20 @@
     "output": "release"
   },
   "files": [
-    "dist/**/*",
-    "apps/electron/dist/main.cjs",
-    "apps/electron/dist/preload.cjs"
+    "apps/dist/**/*",
+    "apps/desktop/dist/*"
   ],
-  "mac": {
-    "category": "public.app-category.productivity",
-    "target": ["dmg", "zip"]
-  },
   "win": {
-    "target": ["nsis", "portable"]
+    "target": [
+      "nsis",
+      "portable"
+    ]
   },
   "linux": {
-    "target": ["AppImage", "deb"],
+    "target": [
+      "AppImage",
+      "tar.gz"
+    ],
     "category": "Utility"
   }
 }
