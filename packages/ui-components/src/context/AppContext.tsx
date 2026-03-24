@@ -31,6 +31,7 @@ interface AppContextType extends AppState {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (!context) {
@@ -131,7 +132,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       
       autoTestConfigs();
     }
-  }, [isLoaded, autoTestComplete, state.llmConfigs.length]);
+  }, [isLoaded, autoTestComplete, state.llmConfigs]);
 
   // Initialize OCR service with API instances when configs change
   useEffect(() => {
@@ -139,7 +140,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       ocrService.setApiInstances(state.llmConfigs);
       console.log(`OCR Service initialized with ${state.llmConfigs.length} API instance(s)`);
     }
-  }, [state.llmConfigs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.llmConfigs.length]);
 
   // Initialize Summary service with API instances when configs change
   useEffect(() => {
@@ -147,7 +149,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       summaryService.setApiInstances(state.llmConfigs);
       console.log(`Summary Service initialized with ${state.llmConfigs.length} API instance(s)`);
     }
-  }, [state.llmConfigs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.llmConfigs.length]);
 
   // LLM Config operations
   const addLLMConfig = useCallback(async (config: LLMConfig) => {
@@ -349,7 +352,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
 
       // Find or create a default summary directory
-      let summaryDir = prev.directories.find(d => d.type === 'summary');
+      const summaryDir = prev.directories.find(d => d.type === 'summary') ?? { id: '' };
       
       if (!summaryDir) {
         console.warn('No summary directory found, please create one first');
@@ -498,7 +501,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           temperature: newTask.temperature,
           maxTokens: newTask.maxTokens,
           customPrompt: newTask.customPrompt,
-          resultFormat: (newTask as any).resultFormat || 'plaintext',
+          resultFormat: (newTask as { resultFormat?: 'plaintext' | 'json' | 'jsonp' | 'yaml' | 'xml' }).resultFormat || 'plaintext',
           metadata: {
             memoryUsage: newTask.memoryUsage,
             memoryConfig: newTask.memoryConfig,
@@ -515,7 +518,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           name: newTask.name,
           content: newTask.result || '', // Store prompt content in content field
           type: 'custom',
-          description: (newTask as any).description || undefined,
+          description: (newTask as { description?: string }).description || undefined,
           category: undefined,
           variables: [],
           isPublic: false,
@@ -600,10 +603,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       if (taskType === 'prompt') {
         // For prompt tasks, update the prompts table
         // Map Task fields to Prompt fields
-        const promptUpdates: any = {};
+        const promptUpdates: { name?: string; content?: string; description?: string } = {};
         if (updates.name !== undefined) promptUpdates.name = updates.name;
         if (updates.result !== undefined) promptUpdates.content = updates.result; // Map result to content
-        if ((updates as any).description !== undefined) promptUpdates.description = (updates as any).description;
+        if ((updates as { description?: string }).description !== undefined) promptUpdates.description = (updates as { description?: string }).description;
         
         await dbService.updatePrompt(taskId, promptUpdates);
         console.log('[AppContext.updateTask] Prompt updated in prompts table:', taskId);

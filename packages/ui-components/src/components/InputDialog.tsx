@@ -45,7 +45,8 @@ export default function InputDialog({
       setDescription(defaultDescription);
       setError(null);
     }
-  }, [open, defaultValue, defaultDescription]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleConfirm = () => {
     if (validate) {

@@ -336,7 +336,7 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
               label="API Type"
               select
               value={formData.provider || 'openai'}
-              onChange={(e) => setFormData({ ...formData, provider: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, provider: e.target.value as LLMConfig['provider'] })}
               fullWidth
               SelectProps={{ native: true }}
             >

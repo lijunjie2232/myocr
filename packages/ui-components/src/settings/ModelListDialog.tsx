@@ -9,7 +9,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   Chip,
   CircularProgress,
   Alert,
@@ -63,6 +62,7 @@ export default function ModelListDialog({ open, onClose, config }: ModelListDial
     if (open && config) {
       fetchModels();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, config]);
 
   // Don't render if config is null or dialog is closed
@@ -95,19 +95,25 @@ export default function ModelListDialog({ open, onClose, config }: ModelListDial
 
         if (response.ok) {
           const data = await response.json();
-          const modelInfos: ModelInfo[] = data.data?.map((m: any) => ({
-            id: m.id,
-            name: m.name || m.id,
-            description: m.description,
-            created: m.created,
-            owned_by: m.owned_by,
-            capabilities: m.capabilities,
-            context_length: m.context_length,
-            max_tokens: m.max_tokens,
-          })) || data.models?.map((m: any) => ({
-            id: typeof m === 'string' ? m : m.id,
-            name: typeof m === 'string' ? m : (m.name || m.id),
-          })) || [];
+          const modelInfos: ModelInfo[] = data.data?.map((m: unknown) => {
+            const model = m as { id: string; name?: string; description?: string; created?: number; owned_by?: string; capabilities?: ModelInfo['capabilities']; context_length?: number; max_tokens?: number };
+            return {
+              id: model.id,
+              name: model.name || model.id,
+              description: model.description,
+              created: model.created,
+              owned_by: model.owned_by,
+              capabilities: model.capabilities,
+              context_length: model.context_length,
+              max_tokens: model.max_tokens,
+            };
+          }) || data.models?.map((m: unknown) => {
+            const model = m as { id: string; name?: string } | string;
+            return {
+              id: typeof model === 'string' ? model : model.id,
+              name: typeof model === 'string' ? model : (model.name || model.id),
+            };
+          }) || [];
           
           setModels(modelInfos);
         } else {
@@ -232,9 +238,9 @@ export default function ModelListDialog({ open, onClose, config }: ModelListDial
 
           {/* Models Grid */}
           {!loading && !error && models.length > 0 && (
-            <Grid container spacing={2}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2 }}>
               {filteredModels.map((model) => (
-                <Grid xs={12} sm={6} md={4} key={model.id}>
+                <Box key={model.id}>
                   <Card
                     sx={{
                       height: '100%',
@@ -320,9 +326,9 @@ export default function ModelListDialog({ open, onClose, config }: ModelListDial
                       </Box>
                     </CardContent>
                   </Card>
-                </Grid>
+                </Box>
               ))}
-            </Grid>
+            </Box>
           )}
 
           {/* Results Count */}

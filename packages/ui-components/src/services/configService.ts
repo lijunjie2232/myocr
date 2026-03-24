@@ -51,7 +51,7 @@ export const llmConfigService = {
       
       const data = await response.json();
       // Adjust based on actual API response format
-      return data.data?.map((m: any) => m.id) || data.models || [];
+      return data.data?.map((m: unknown) => (m as { id: string }).id) || data.models || [];
     } catch (error) {
       console.error('Failed to fetch models:', error);
       return [];
@@ -89,7 +89,7 @@ export const llmConfigService = {
   /**
    * 测试 Ollama API
    */
-  async testOllama(url: string, _apiKey: string): Promise<{ success: boolean; message: string; models?: string[] }> {
+  async testOllama(url: string, _apiKey: string): Promise<{ success: boolean; message: string; models?: string[] }> { // eslint-disable-line @typescript-eslint/no-unused-vars
     try {
       const response = await fetch(`${url}/api/tags`, {
         headers: {
@@ -102,7 +102,7 @@ export const llmConfigService = {
       }
 
       const data = await response.json();
-      const models = data.models?.map((m: any) => m.name) || [];
+      const models = data.models?.map((m: unknown) => (m as { name: string }).name) || [];
       
       return {
         success: true,
@@ -110,6 +110,7 @@ export const llmConfigService = {
         models,
       };
     } catch (error) {
+      console.error('Ollama connection test failed:', error);
       throw error;
     }
   },
@@ -133,7 +134,7 @@ export const llmConfigService = {
       }
 
       const data = await response.json();
-      const models = data.data?.map((m: any) => m.id) || [];
+      const models = data.data?.map((m: unknown) => (m as { id: string }).id) || [];
       
       return {
         success: true,
@@ -141,6 +142,7 @@ export const llmConfigService = {
         models,
       };
     } catch (error) {
+      console.error('OpenAI connection test failed:', error);
       throw error;
     }
   },
@@ -177,6 +179,7 @@ export const llmConfigService = {
         throw new Error(`HTTP ${response.status}: ${JSON.stringify(errorData)}`);
       }
     } catch (error) {
+      console.error('Anthropic connection test failed:', error);
       throw error;
     }
   },
@@ -210,6 +213,7 @@ export const llmConfigService = {
           };
         }
       } catch (err) {
+        console.error(`Custom endpoint test failed for ${endpoint}:`, err);
         // Try next endpoint
         continue;
       }
@@ -236,6 +240,7 @@ export const llmConfigService = {
         throw new Error(`Server responded with HTTP ${response.status}`);
       }
     } catch (error) {
+      console.error('Custom connection test failed:', error);
       throw new Error(`All test methods failed: ${(error as Error).message}`);
     }
   },

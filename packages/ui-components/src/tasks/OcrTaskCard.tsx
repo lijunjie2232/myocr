@@ -80,7 +80,7 @@ export default function OcrTaskCard({ task, onDelete, onExport, onRetry }: Omit<
           <Chip
             label={task.status}
             size="small"
-            color={getStatusColor() as any}
+            color={getStatusColor() as 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'}
           />
         </Box>
 
