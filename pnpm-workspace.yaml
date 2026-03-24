@@ -6,3 +6,7 @@ allowBuilds:
   electron: true
   electron-winstaller: true
   esbuild: true
+overrides:
+  react: ^19.2.0
+  react-dom: ^19.2.0
+

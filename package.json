@@ -1,21 +1,22 @@
 {
   "name": "myocr",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "main": "apps/desktop/dist/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:prod": "cross-env NODE_ENV=production vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "postinstall": "electron-rebuild",
     "electron:dev": "concurrently \"cross-env BROWSER=none npm run dev\" \"wait-on http://localhost:5173 && npm run electron:build-dev && cross-env NODE_ENV=development electron .\"",
     "electron:build-dev": "cd apps/desktop && node build.config.js",
-    "electron:build": "npm run build && electron-builder",
-    "electron:build:win": "npm run build && electron-builder --win",
-    "electron:build:mac": "npm run build && electron-builder --mac",
-    "electron:build:linux": "npm run build && electron-builder --linux",
+    "electron:build": "npm run build:prod && electron-builder",
+    "electron:build:win": "npm run build:prod && electron-builder --win",
+    "electron:build:mac": "npm run build:prod && electron-builder --mac",
+    "electron:build:linux": "npm run build:prod && electron-builder --linux",
     "rebuild": "electron-rebuild"
   },
   "dependencies": {
@@ -60,6 +61,7 @@
     "typescript-eslint": "^8.48.0",
     "util": "^0.12.5",
     "vite": "^8.0.0-beta.13",
+    "vite-plugin-remove-console": "^2.2.0",
     "wait-on": "^9.0.4"
   },
   "dependenciesMeta": {

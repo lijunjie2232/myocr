@@ -4,6 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  react: ^19.2.0
+  react-dom: ^19.2.0
+
 importers:
 
   .:
@@ -129,6 +133,9 @@ importers:
       vite:
         specifier: ^8.0.0-beta.13
         version: 8.0.0(@types/node@24.12.0)(jiti@2.6.1)(yaml@2.8.2)
+      vite-plugin-remove-console:
+        specifier: ^2.2.0
+        version: 2.2.0
       wait-on:
         specifier: ^9.0.4
         version: 9.0.4
@@ -209,9 +216,6 @@ importers:
 
   packages/database:
     dependencies:
-      '@myocr/types':
-        specifier: workspace:*
-        version: link:../types
       '@prisma/adapter-better-sqlite3':
         specifier: ^7.5.0
         version: 7.5.0
@@ -225,9 +229,6 @@ importers:
         specifier: ^17.3.1
         version: 17.3.1
     devDependencies:
-      '@types/better-sqlite3':
-        specifier: ^7.6.0
-        version: 7.6.13
       '@types/node':
         specifier: ^24.10.1
         version: 24.12.0
@@ -418,8 +419,8 @@ packages:
     engines: {node: '>=14.0.0'}
     peerDependencies:
       '@types/react': ^17 || ^18 || ^19
-      react: ^17 || ^18 || ^19
-      react-dom: ^17 || ^18 || ^19
+      react: ^19.2.0
+      react-dom: ^19.2.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
@@ -428,8 +429,8 @@ packages:
     resolution: {integrity: sha512-yQ+qeuqohwhsNpoYDqqXaLllYAkPCP4vYdDrVo8FQXaAPfHWm1pG/Vm+jmGTA5JFS0BAIjookyapuJFY8F9PIw==}
     peerDependencies:
       '@types/react': ^17 || ^18 || ^19
-      react: ^17 || ^18 || ^19
-      react-dom: ^17 || ^18 || ^19
+      react: ^19.2.0
+      react-dom: ^19.2.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
@@ -535,7 +536,7 @@ packages:
     resolution: {integrity: sha512-O000MLDBDdk/EohJPFUqvnp4qnHeYkVP5B0xEG0D/L7cOKP9kefu2DXn8dj74cQfsEzUqh+sr1RzFqiL1o+PpA==}
     peerDependencies:
       '@types/react': '*'
-      react: '>=16.8.0'
+      react: ^19.2.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
@@ -551,7 +552,7 @@ packages:
     peerDependencies:
       '@emotion/react': ^11.0.0-rc.0
       '@types/react': '*'
-      react: '>=16.8.0'
+      react: ^19.2.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
@@ -562,7 +563,7 @@ packages:
   '@emotion/use-insertion-effect-with-fallbacks@1.2.0':
     resolution: {integrity: sha512-yJMtVdH59sxi/aVJBpk9FQq+OR8ll5GT8oWd57UpeaKEVGab41JWaCFA7FRLoMLloOZF/c/wsPoe+bfGmRKgDg==}
     peerDependencies:
-      react: '>=16.8.0'
+      react: ^19.2.0
 
   '@emotion/utils@1.4.2':
     resolution: {integrity: sha512-3vLclRofFziIa3J2wDh9jjbkUz9qk5Vi3IZ/FSTKViB0k+ef0fPV7dYrUIugbgupYDx7v9ud/SjrtEP8Y4xLoA==}
@@ -776,8 +777,8 @@ packages:
   '@floating-ui/react-dom@2.1.8':
     resolution: {integrity: sha512-cC52bHwM/n/CxS87FH0yWdngEZrjdtLW/qVruo68qg+prK7ZQ4YGdut2GyDVpoGeAYe/h899rVeOVm6Oi40k2A==}
     peerDependencies:
-      react: '>=16.8.0'
-      react-dom: '>=16.8.0'
+      react: ^19.2.0
+      react-dom: ^19.2.0
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
@@ -891,8 +892,8 @@ packages:
     peerDependencies:
       '@angular/core': ^18.0.0 || ^19.0.0 || ^20.0.0
       '@langchain/core': ^1.1.16
-      react: ^18 || ^19
-      react-dom: ^18 || ^19
+      react: ^19.2.0
+      react-dom: ^19.2.0
       svelte: ^4.0.0 || ^5.0.0
       vue: ^3.0.0
     peerDependenciesMeta:
@@ -959,7 +960,7 @@ packages:
     peerDependencies:
       '@mui/material': ^7.3.9
       '@types/react': ^17.0.0 || ^18.0.0 || ^19.0.0
-      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+      react: ^19.2.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
@@ -972,8 +973,8 @@ packages:
       '@emotion/styled': ^11.3.0
       '@mui/material-pigment-css': ^7.3.9
       '@types/react': ^17.0.0 || ^18.0.0 || ^19.0.0
-      react: ^17.0.0 || ^18.0.0 || ^19.0.0
-      react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
+      react: ^19.2.0
+      react-dom: ^19.2.0
     peerDependenciesMeta:
       '@emotion/react':
         optional: true
@@ -989,7 +990,7 @@ packages:
     engines: {node: '>=14.0.0'}
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0 || ^19.0.0
-      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+      react: ^19.2.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
@@ -1000,7 +1001,7 @@ packages:
     peerDependencies:
       '@emotion/react': ^11.4.1
       '@emotion/styled': ^11.3.0
-      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+      react: ^19.2.0
     peerDependenciesMeta:
       '@emotion/react':
         optional: true
@@ -1014,7 +1015,7 @@ packages:
       '@emotion/react': ^11.5.0
       '@emotion/styled': ^11.3.0
       '@types/react': ^17.0.0 || ^18.0.0 || ^19.0.0
-      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+      react: ^19.2.0
     peerDependenciesMeta:
       '@emotion/react':
         optional: true
@@ -1036,7 +1037,7 @@ packages:
     engines: {node: '>=14.0.0'}
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0 || ^19.0.0
-      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+      react: ^19.2.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
@@ -1122,8 +1123,8 @@ packages:
     engines: {node: ^20.19 || ^22.12 || ^24.0, pnpm: '8'}
     peerDependencies:
       '@types/react': ^18.0.0 || ^19.0.0
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
+      react: ^19.2.0
+      react-dom: ^19.2.0
 
   '@rolldown/binding-android-arm64@1.0.0-rc.9':
     resolution: {integrity: sha512-lcJL0bN5hpgJfSIz/8PIf02irmyL43P+j1pTCfbD1DbLkmGRuFIA4DD3B3ZOvGqG0XiVvRznbKtN0COQVaKUTg==}
@@ -1251,9 +1252,6 @@ packages:
 
   '@types/babel__traverse@7.28.0':
     resolution: {integrity: sha512-8PvcXf70gTDZBgt9ptxJ8elBeBjcLOAcOtoO/mPJjtji1+CdGbHgm77om1GrsPxsiE+uXIpNSK64UYaIwQXd4Q==}
-
-  '@types/better-sqlite3@7.6.13':
-    resolution: {integrity: sha512-NMv9ASNARoKksWtsq/SHakpYAYnhBrQgGD8zkLYk/jaK8jUGn08CfEdTRgYhMypUQAfzSP8W6gNLe0q19/t4VA==}
 
   '@types/browserify@12.0.40':
     resolution: {integrity: sha512-vH5hW7Kt2OoSkCDLzCATlG43lrA2sMIVDvN5PaXsMBPxR4aZSdGJj3de6Z8O8cglnTWp6GuPE0B2HKHi0E4T0w==}
@@ -3386,7 +3384,7 @@ packages:
   react-dom@19.2.4:
     resolution: {integrity: sha512-AXJdLo8kgMbimY95O2aKQqsz2iWi9jMgKJhRBAxECE4IFxfcazB2LmzloIoibJI3C12IlY20+KFaLv+71bUJeQ==}
     peerDependencies:
-      react: ^19.2.4
+      react: ^19.2.0
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -3401,8 +3399,8 @@ packages:
   react-transition-group@4.4.5:
     resolution: {integrity: sha512-pZcd1MCJoiKiBR2NRxeCRg13uCXbydPnmB4EOeRrY7480qNWO8IIgQG6zlDkm6uRMsURXPuKq0GWtiM59a5Q6g==}
     peerDependencies:
-      react: '>=16.6.0'
-      react-dom: '>=16.6.0'
+      react: ^19.2.0
+      react-dom: ^19.2.0
 
   react@19.2.4:
     resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
@@ -3892,7 +3890,7 @@ packages:
   use-sync-external-store@1.6.0:
     resolution: {integrity: sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==}
     peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react: ^19.2.0
 
   utf8-byte-length@1.0.5:
     resolution: {integrity: sha512-Xn0w3MtiQ6zoz2vFyUVruaCL53O/DwUvkEeOvj+uulMm0BkUGYWmBYVyElqZaSLhY6ZD0ulfU3aBra2aVT4xfA==}
@@ -3929,6 +3927,9 @@ packages:
   verror@1.10.1:
     resolution: {integrity: sha512-veufcmxri4e3XSrT0xwfUR7kguIkaxBeosDg00yDWhk49wdwkSUrvvsm7nc75e1PUyvIeZj6nS8VQRYz2/S4Xg==}
     engines: {node: '>=0.6.0'}
+
+  vite-plugin-remove-console@2.2.0:
+    resolution: {integrity: sha512-qgjh5pz75MdE9Kzs8J0kBwaCfifHV0ezRbB9rpGsIOxam+ilcGV7WOk91vFJXquzRmiKrFh3Hxlh0JJWAmXTbQ==}
 
   vite@8.0.0:
     resolution: {integrity: sha512-fPGaRNj9Zytaf8LEiBhY7Z6ijnFKdzU/+mL8EFBaKr7Vw1/FWcTBAMW0wLPJAGMPX38ZPVCVgLceWiEqeoqL2Q==}
@@ -5097,10 +5098,6 @@ snapshots:
   '@types/babel__traverse@7.28.0':
     dependencies:
       '@babel/types': 7.29.0
-
-  '@types/better-sqlite3@7.6.13':
-    dependencies:
-      '@types/node': 24.12.0
 
   '@types/browserify@12.0.40':
     dependencies:
@@ -8174,6 +8171,8 @@ snapshots:
       core-util-is: 1.0.2
       extsprintf: 1.4.1
     optional: true
+
+  vite-plugin-remove-console@2.2.0: {}
 
   vite@8.0.0(@types/node@24.12.0)(jiti@2.6.1)(yaml@2.8.2):
     dependencies:
