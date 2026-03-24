@@ -11,7 +11,7 @@ export interface LLMServerAPI {
   models: string[];  // Array of available models
   isEnabled: boolean;
   sortOrder: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,7 +29,7 @@ export interface LLMConfig {
   models?: string[];  // Available models
   is_enabled?: boolean;  // Enabled status
   sort_order?: number;  // Sort order
-  metadata?: Record<string, any>;  // Additional metadata
+  metadata?: Record<string, unknown>;  // Additional metadata
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,7 +46,7 @@ export interface Task {
   name: string;
   type: TaskType;
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  config?: any; // Store task configuration as JSON
+  config?: unknown; // Store task configuration as JSON
   inputText?: string;
   result?: string;
   errorMessage?: string;
@@ -60,7 +60,7 @@ export interface Task {
   memoryConfig?: { trigger: number; keep: number }; // Memory configuration
   textSplitConfig?: { chunkSize: number; chunkOverlap: number }; // Text split configuration
   resultFormat?: 'plaintext' | 'json' | 'jsonp' | 'yaml' | 'xml'; // Result format for summary tasks
-  metadata?: Record<string, any>; // Metadata for storing processing details
+  metadata?: Record<string, unknown>; // Metadata for storing processing details
   createdAt: Date;
   updatedAt: Date;
 }
@@ -73,7 +73,7 @@ export interface OCRDirectory {
   id: string;
   name: string;
   description?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -103,7 +103,7 @@ export interface OCRTask {
   customPrompt?: string;
   
   // Metadata
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -116,7 +116,7 @@ export interface SummaryDirectory {
   id: string;
   name: string;
   description?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -145,7 +145,7 @@ export interface SummaryTask {
   resultFormat?: 'plaintext' | 'json' | 'jsonp' | 'yaml' | 'xml';
   
   // Metadata
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -158,7 +158,7 @@ export interface PromptDirectory {
   id: string;
   name: string;
   description?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -177,7 +177,7 @@ export interface Prompt {
   isFavorite: boolean;
   version: number;
   parentId?: string;  // For versioning/inheritance
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -194,7 +194,7 @@ export interface Directory {
   name: string;
   type: TaskType;
   description?: string;  // Added description
-  metadata?: Record<string, any>;  // Added metadata
+  metadata?: Record<string, unknown>;  // Added metadata
   tasks: Task[];
   createdAt: Date;
   updatedAt: Date;
@@ -217,7 +217,7 @@ export interface TaskExecutionLog {
   taskType: 'ocr' | 'summary' | 'prompt';
   action: string;
   message?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   createdAt: Date;
 }
 
@@ -230,7 +230,7 @@ export interface FileAttachment {
   fileSize: number;  // Size in bytes
   fileHash?: string;  // SHA256 hash
   fileBlob: Uint8Array;  // File binary data
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
 }
 
@@ -278,15 +278,21 @@ export interface ElectronAPI {
     saveAppState: (state: AppState) => Promise<void>;
     
     // Tasks
-    createOcrTask: (task: any) => Promise<void>;
-    updateOcrTask: (id: string, updates: any) => Promise<void>;
-    getOcrTasksByDirectory: (directoryId: string) => Promise<any[]>;
+    createOcrTask: (task: unknown) => Promise<void>;
+    updateOcrTask: (id: string, updates: unknown) => Promise<void>;
+    getOcrTasksByDirectory: (directoryId: string) => Promise<unknown[]>;
     deleteOcrTask: (id: string) => Promise<void>;
     
+    // Summary Tasks
+    createSummaryTask: (task: unknown) => Promise<void>;
+    updateSummaryTask: (id: string, updates: unknown) => Promise<void>;
+    getSummaryTasksByDirectory: (directoryId: string) => Promise<unknown[]>;
+    deleteSummaryTask: (id: string) => Promise<void>;
+    
     // Prompt Templates
-    createPrompt: (task: any) => Promise<void>;
-    getPromptsByDirectory: (directoryId: string) => Promise<any[]>;
-    updatePrompt: (id: string, updates: any) => Promise<void>;
+    createPrompt: (task: unknown) => Promise<void>;
+    getPromptsByDirectory: (directoryId: string) => Promise<unknown[]>;
+    updatePrompt: (id: string, updates: unknown) => Promise<void>;
     deletePrompt: (id: string) => Promise<void>;
     
     // Utility
@@ -295,14 +301,14 @@ export interface ElectronAPI {
   
   // OCR Service
   ocr: {
-    processImage: (request: any) => Promise<{ success: boolean; data: any; error?: string }>;
-    setApiInstances: (configs: any[]) => Promise<{ success: boolean }>;
+    processImage: (request: unknown) => Promise<{ success: boolean; data: unknown; error?: string }>;
+    setApiInstances: (configs: unknown[]) => Promise<{ success: boolean }>;
   };
   
   // Summary Service
   summary: {
-    processSummary: (request: any) => Promise<{ success: boolean; data: any; error?: string }>;
-    setApiInstances: (configs: any[]) => Promise<{ success: boolean }>;
+    processSummary: (request: unknown) => Promise<{ success: boolean; data: unknown; error?: string }>;
+    setApiInstances: (configs: unknown[]) => Promise<{ success: boolean }>;
   };
 }
 
