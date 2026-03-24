@@ -33,7 +33,7 @@ export interface SummaryRequest {
 
 export interface SummaryResponse {
   summary: string;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 // Structured response schema for summary task
@@ -153,7 +153,7 @@ class SummaryServiceClass {
       let summaryText: string;
       if (result.structuredResponse) {
         // Use structured response if available
-        const structured = result.structuredResponse as any;
+        const structured = result.structuredResponse as { summary: string; keyPoints?: unknown[] };
         summaryText = this.formatStructuredResponse(structured, request.resultFormat);
       } else {
         // Fall back to last AI message
@@ -207,11 +207,11 @@ class SummaryServiceClass {
   /**
    * Format structured response according to requested format
    */
-  private formatStructuredResponse(obj: any, format: 'plaintext' | 'json' | 'jsonp' | 'yaml' | 'xml' = 'plaintext'): string {
+  private formatStructuredResponse(obj: { summary: string; keyPoints?: unknown[] }, format: 'plaintext' | 'json' | 'jsonp' | 'yaml' | 'xml' = 'plaintext'): string {
     if (format === 'plaintext') {
       // Return summary as plain text with key points
       const points = Array.isArray(obj.keyPoints) ? obj.keyPoints : [];
-      return `${obj.summary}\n\nKey Points:\n${points.map((p: string) => `- ${p}`).join('\n')}`;
+      return `${obj.summary}\n\nKey Points:\n${points.map((p: unknown) => `- ${typeof p === 'string' ? p : String(p)}`).join('\n')}`;
     }
 
     const jsonStr = JSON.stringify(obj, null, 2);
@@ -238,7 +238,7 @@ class SummaryServiceClass {
   /**
    * Simple JSON to XML converter
    */
-  private toXml(key: string, value: any): string {
+  private toXml(key: string, value: unknown): string {
     if (value == null) return `<${key}/>`;
     if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
       const esc = String(value)
@@ -260,7 +260,7 @@ class SummaryServiceClass {
   /**
    * Simple JSON to YAML converter
    */
-  private toJsonYaml(value: any, indent = 0): string {
+  private toJsonYaml(value: unknown, indent = 0): string {
     const pad = '  '.repeat(indent);
     if (value == null) return `${pad}null\n`;
     if (typeof value === 'string') return `${pad}"${value.replace(/"/g, '\\"')}"\n`;
@@ -319,7 +319,7 @@ class SummaryServiceClass {
     const llm = await initChatModel(
       modelName,
       {
-        modelProvider: provider as any,
+        modelProvider: provider,
         temperature: request.temperature ?? 0.7,
         configuration: {
           baseURL: config.baseUrl,
@@ -330,7 +330,7 @@ class SummaryServiceClass {
     );
 
     // Build middleware array
-    const middleware: any[] = [];
+    const middleware: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     // Add system prompt if provided
     if (request.prompt) {

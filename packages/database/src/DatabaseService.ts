@@ -1,13 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PrismaClient } from '@prisma/client';
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
-import type { LLMConfig, Directory, OCRDirectory, SummaryDirectory, PromptDirectory, Prompt } from '@myocr/types';
+import type { LLMConfig, Directory, Prompt, Task } from '@myocr/types';
 
 export class DatabaseService {
   private prisma: PrismaClient;
-  private dbPath: string;
 
   constructor(dbPath: string) {
-    this.dbPath = dbPath;
     // Initialize Prisma Client with SQLite database using better-sqlite3 adapter
     const connectionString = `file:${dbPath}`;
     const adapter = new PrismaBetterSqlite3({ url: connectionString });
@@ -40,7 +39,7 @@ export class DatabaseService {
     return configs.map(config => ({
       id: config.id,
       name: config.name,
-      provider: config.provider as any,
+      provider: config.provider as 'openai' | 'anthropic' | 'ollama' | 'custom',
       baseUrl: config.baseUrl ?? undefined,
       apiKey: config.apiKey,
       models: JSON.parse(config.models || '[]'),
@@ -72,7 +71,7 @@ export class DatabaseService {
   }
 
   async updateLLMConfig(id: string, updates: Partial<LLMConfig>): Promise<void> {
-    const updateData: any = {
+    const updateData: { [key: string]: unknown } = {
       updatedAt: new Date(),
     };
     
@@ -101,7 +100,7 @@ export class DatabaseService {
     return {
       id: config.id,
       name: config.name,
-      provider: config.provider as any,
+      provider: config.provider as 'openai' | 'anthropic' | 'ollama' | 'custom',
       baseUrl: config.baseUrl ?? undefined,
       apiKey: config.apiKey,
       models: JSON.parse(config.models || '[]'),
@@ -171,7 +170,7 @@ export class DatabaseService {
     if (!directory) return null;
     
     // Then load tasks based on directory type
-    let tasks: any[] = [];
+    let tasks: Task[] = [];
     switch (directory.type) {
       case 'ocr':
         tasks = await this.getOcrTasksByDirectory(directoryId);
@@ -237,7 +236,7 @@ export class DatabaseService {
 
   async updateDirectory(id: string, directory: Directory): Promise<void> {
     const now = new Date();
-    const updateData: any = {
+    const updateData: { name: string; updatedAt: Date; description: string | null; metadata: string | null } = {
       name: directory.name,
       updatedAt: now,
       description: directory.description ?? null,
@@ -350,31 +349,31 @@ export class DatabaseService {
     });
   }
 
-  async getPromptsByDirectory(directoryId: string): Promise<any[]> {
+  async getPromptsByDirectory(directoryId: string): Promise<Task[]> {
     const prompts = await this.prisma.prompt.findMany({
       where: { directoryId },
       orderBy: { createdAt: 'desc' },
     });
     
-    return prompts.map((prompt: any) => ({
+    return prompts.map((prompt) => ({
       id: prompt.id,
       name: prompt.name,
       status: 'completed' as const,
       result: prompt.content,
       type: 'prompt' as const,
-      category: prompt.category,
-      description: prompt.description,
+      category: prompt.category ?? undefined,
+      description: prompt.description ?? undefined,
       variables: JSON.parse(prompt.variables || '[]'),
       isFavorite: prompt.isFavorite,
       usageCount: prompt.usageCount,
-      metadata: prompt.metadata ? JSON.parse(prompt.metadata) : null,
+      metadata: prompt.metadata ? JSON.parse(prompt.metadata) : undefined,
       createdAt: prompt.createdAt,
       updatedAt: prompt.updatedAt,
-    }));
+    })) as Task[];
   }
 
   async updatePrompt(id: string, updates: Partial<Prompt>): Promise<void> {
-    const updateData: any = {
+    const updateData: { updatedAt: Date; [key: string]: unknown } = {
       updatedAt: new Date(),
     };
     
@@ -393,9 +392,9 @@ export class DatabaseService {
         where: { id },
         data: updateData,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If record not found, just log warning and skip update
-      if (error.code === 'P2025') {
+      if ((error as { code?: string }).code === 'P2025') {
         console.warn('[DatabaseService.updatePrompt] Prompt not found, skipping update:', id);
         return;
       }
@@ -408,9 +407,9 @@ export class DatabaseService {
       await this.prisma.prompt.delete({
         where: { id },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If record not found, just log warning and skip delete
-      if (error.code === 'P2025') {
+      if ((error as { code?: string }).code === 'P2025') {
         console.warn('[DatabaseService.deletePrompt] Prompt not found, skipping delete:', id);
         return;
       }
@@ -420,7 +419,7 @@ export class DatabaseService {
 
   // ==================== OCR Tasks ====================
 
-  async createOcrTask(task: any): Promise<void> {
+  async createOcrTask(task: { id: string; directoryId: string; name: string; status: string; imageData?: string; imageMimeType?: string; imageName?: string; apiConfigId?: string; selectedModel?: string; temperature?: number; maxTokens?: number; customPrompt?: string; metadata?: unknown }): Promise<void> {
     const now = new Date();
     
     // Validate and log image data
@@ -463,8 +462,8 @@ export class DatabaseService {
     console.log('[DatabaseService] OCR task created successfully');
   }
 
-  async updateOcrTask(id: string, updates: any): Promise<void> {
-    const updateData: any = {
+  async updateOcrTask(id: string, updates: { [key: string]: unknown }): Promise<void> {
+    const updateData: { [key: string]: unknown } = {
       updatedAt: new Date(),
     };
     
@@ -484,9 +483,9 @@ export class DatabaseService {
         where: { id },
         data: updateData,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If record not found, just log warning and skip update
-      if (error.code === 'P2025') {
+      if ((error as { code?: string }).code === 'P2025') {
         console.warn('[DatabaseService.updateOcrTask] OCR task not found, skipping update:', id);
         return;
       }
@@ -494,13 +493,13 @@ export class DatabaseService {
     }
   }
 
-  async getOcrTasksByDirectory(directoryId: string): Promise<any[]> {
+  async getOcrTasksByDirectory(directoryId: string): Promise<Task[]> {
     const tasks = await this.prisma.ocrTask.findMany({
       where: { directoryId },
       orderBy: { createdAt: 'desc' },
     });
     
-    return tasks.map((task: any) => {
+    return tasks.map((task) => {
       // Convert blob (Uint8Array) to base64 string properly
       let base64Data = '';
       if (task.imageBlob) {
@@ -520,17 +519,20 @@ export class DatabaseService {
       }
       
       return {
-        ...task,
+        id: task.id,
+        name: task.name,
         type: 'ocr' as const,
-        // Convert blob to data URL for display in img tag
+        status: task.status,
         imageUrl: base64Data && task.imageMimeType 
           ? `data:${task.imageMimeType};base64,${base64Data}`
           : null,
-        metadata: task.metadata ? JSON.parse(task.metadata) : null,
+        imageBlob: task.imageBlob,
+        imageMimeType: task.imageMimeType,
+        metadata: task.metadata ? JSON.parse(task.metadata) : undefined,
         createdAt: task.createdAt,
         updatedAt: task.updatedAt,
       };
-    });
+    }) as Task[];
   }
 
   async deleteOcrTask(id: string): Promise<void> {
@@ -538,9 +540,9 @@ export class DatabaseService {
       await this.prisma.ocrTask.delete({
         where: { id },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If record not found, just log warning and skip delete
-      if (error.code === 'P2025') {
+      if ((error as { code?: string }).code === 'P2025') {
         console.warn('[DatabaseService.deleteOcrTask] OCR task not found, skipping delete:', id);
         return;
       }
@@ -550,7 +552,7 @@ export class DatabaseService {
 
   // ==================== Summary Tasks ====================
 
-  async createSummaryTask(task: any): Promise<void> {
+  async createSummaryTask(task: { id: string; directoryId: string; name: string; status?: string; inputText: string; apiConfigId?: string | null; selectedModel?: string | null; temperature?: number; maxTokens?: number; customPrompt?: string | null; resultFormat?: string; metadata?: unknown }): Promise<void> {
     const now = new Date();
     await this.prisma.summaryTask.create({
       data: {
@@ -594,9 +596,9 @@ export class DatabaseService {
         where: { id },
         data: updateData,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If record not found, just log warning and skip update
-      if (error.code === 'P2025') {
+      if ((error as { code?: string }).code === 'P2025') {
         console.warn('[DatabaseService.updateSummaryTask] Summary task not found, skipping update:', id);
         return;
       }
@@ -624,9 +626,9 @@ export class DatabaseService {
       await this.prisma.summaryTask.delete({
         where: { id },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If record not found, just log warning and skip delete
-      if (error.code === 'P2025') {
+      if ((error as { code?: string }).code === 'P2025') {
         console.warn('[DatabaseService.deleteSummaryTask] Summary task not found, skipping delete:', id);
         return;
       }

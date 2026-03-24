@@ -16,7 +16,7 @@ export interface OCRRequest {
 export interface OCRResponse {
   text: string;
   confidence?: number;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 export interface SummaryRequest {
@@ -41,7 +41,7 @@ export interface SummaryRequest {
 
 export interface SummaryResponse {
   summary: string;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 /**
@@ -59,7 +59,7 @@ export const ocrService = {
    * Set API instances (configs)
    * This should be called when LLM configs change
    */
-  setApiInstances(configs: any[]) {
+  setApiInstances(configs: unknown[]) {
     if (!isElectron()) {
       console.warn('Not running in Electron, cannot set API instances');
       return;
@@ -104,7 +104,7 @@ export const ocrService = {
       throw new Error(result.error || 'OCR processing failed');
     }
 
-    return result.data;
+    return result.data as any as OCRResponse;
   },
 };
 
@@ -116,7 +116,7 @@ export const summaryService = {
    * Set API instances (configs)
    * This should be called when LLM configs change
    */
-  setApiInstances(configs: any[]) {
+  setApiInstances(configs: unknown[]) {
     if (!isElectron()) {
       console.warn('Not running in Electron, cannot set API instances');
       return;
@@ -145,6 +145,6 @@ export const summaryService = {
       throw new Error(result.error || 'Summary processing failed');
     }
 
-    return result.data;
+    return result.data as any as SummaryResponse;
   },
 };

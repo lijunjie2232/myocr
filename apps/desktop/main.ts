@@ -1,6 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
 
 // Import Database service from packages
 import { DatabaseService } from '@myocr/database';
@@ -24,7 +23,9 @@ async function initDatabase() {
 }
 
 // Database migration function - currently not used
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// This code is kept for reference but commented out to avoid TypeScript errors
+ 
+/*
 function runMigrations() {
   console.log('[Electron Main] Running database migrations...');
   
@@ -64,6 +65,7 @@ function runMigrations() {
     throw error;
   }
 }
+*/
 
 function setupIpcHandlers() {
   // LLM Configs
@@ -200,9 +202,9 @@ function setupIpcHandlers() {
       });
       const result = await ocrService.processImage(request);
       return { success: true, data: result };
-    } catch (error: any) {
+    } catch (error) {
       console.error('OCR processing failed:', error);
-      return { success: false, error: error.message || 'OCR processing failed' };
+      return { success: false, error: (error as Error).message || 'OCR processing failed' };
     }
   });
   
@@ -216,9 +218,9 @@ function setupIpcHandlers() {
     try {
       const result = await summaryService.processSummary(request);
       return { success: true, data: result };
-    } catch (error: any) {
+    } catch (error) {
       console.error('Summary processing failed:', error);
-      return { success: false, error: error.message || 'Summary processing failed' };
+      return { success: false, error: (error as Error).message || 'Summary processing failed' };
     }
   });
   
@@ -251,7 +253,10 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
   } else {
     // Production: load built files
-    mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'));
+    // In production build, the index.html is in the parent directory of __dirname
+    // because main.cjs is in apps/desktop/dist/ but index.html is in apps/dist/
+    const indexPath = path.join(__dirname, '../../dist/index.html');
+    mainWindow.loadFile(indexPath);
   }
 
   mainWindow.on('closed', () => {

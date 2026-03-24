@@ -14,7 +14,7 @@ export interface OCRRequest {
 export interface OCRResponse {
   text: string;
   confidence?: number;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 // Service Class - creates new LangChain instances per request
@@ -182,7 +182,7 @@ class OCRServiceClass {
     const llm = await initChatModel(
       modelName,
       {
-        modelProvider: provider as any,
+        modelProvider: provider,
         temperature: temperature ?? 0.6,
         configuration: {
           baseURL: config.baseUrl,

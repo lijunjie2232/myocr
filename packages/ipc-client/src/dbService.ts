@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // IPC Client Service for Renderer Process (React)
 // This service calls Electron main process via IPC
 import type { AppState, LLMConfig, Directory, ElectronAPI } from "@myocr/types";
@@ -70,13 +71,13 @@ class DatabaseIPCClient {
     // Convert dates back from ISO strings
     return dirs.map(d => ({
       ...d,
-      createdAt: new Date(d.createdAt as any),
-      updatedAt: new Date(d.updatedAt as any),
+      createdAt: new Date(d.createdAt as unknown as string),
+      updatedAt: new Date(d.updatedAt as unknown as string),
       tasks: d.tasks.map((t: any) => ({
         ...t,
-        metadata: this.parseMetadata(t.metadata),
-        createdAt: new Date(t.createdAt as any),
-        updatedAt: new Date(t.updatedAt as any),
+        metadata: this.parseMetadata((t as any).metadata),
+        createdAt: new Date((t as any).createdAt as unknown as string),
+        updatedAt: new Date((t as any).updatedAt as unknown as string),
       })),
     }));
   }
@@ -120,13 +121,13 @@ class DatabaseIPCClient {
     const dir = await win.electronAPI!.db.getDirectory(id);
     if (dir) {
       // Convert ISO date strings back to Date objects
-      dir.createdAt = new Date(dir.createdAt as any);
-      dir.updatedAt = new Date(dir.updatedAt as any);
+      dir.createdAt = new Date(dir.createdAt as unknown as string);
+      dir.updatedAt = new Date(dir.updatedAt as unknown as string);
       dir.tasks = dir.tasks.map((t: any) => ({
         ...t,
-        metadata: this.parseMetadata(t.metadata),
-        createdAt: new Date(t.createdAt as any),
-        updatedAt: new Date(t.updatedAt as any),
+        metadata: this.parseMetadata((t as any).metadata),
+        createdAt: new Date((t as any).createdAt as unknown as string),
+        updatedAt: new Date((t as any).updatedAt as unknown as string),
       }));
     }
     return dir;
@@ -147,14 +148,14 @@ class DatabaseIPCClient {
       ...directory,
       tasks: directory.tasks.map((task: any) => ({
         ...task,
-        metadata: this.parseMetadata(task.metadata),
-        createdAt: new Date(task.createdAt as any),
-        updatedAt: new Date(task.updatedAt as any),
+        metadata: this.parseMetadata((task as any).metadata),
+        createdAt: new Date((task as any).createdAt as unknown as string),
+        updatedAt: new Date((task as any).updatedAt as unknown as string),
       })),
     };
   }
 
-  private parseMetadata(metadata: any): any {
+  private parseMetadata(metadata: unknown): Record<string, unknown> | null {
     if (!metadata) return null;
     if (typeof metadata === 'string') {
       try {
@@ -163,7 +164,11 @@ class DatabaseIPCClient {
         return null;
       }
     }
-    return metadata;
+    // Ensure it's a proper Record<string, unknown>
+    if (typeof metadata === 'object' && metadata !== null) {
+      return metadata as Record<string, unknown>;
+    }
+    return null;
   }
 
   async deleteDirectory(id: string): Promise<void> {
@@ -186,14 +191,21 @@ class DatabaseIPCClient {
     
     if (state) {
       // Convert dates
-      state.directories = state.directories.map((d: any) => ({
+      state.directories = state.directories.map((d) => ({
         ...d,
-        createdAt: new Date(d.createdAt as any),
-        updatedAt: new Date(d.updatedAt as any),
-        tasks: d.tasks.map((t: any) => ({
+        id: d.id,
+        name: d.name,
+        type: d.type,
+        createdAt: new Date(d.createdAt as unknown as string),
+        updatedAt: new Date(d.updatedAt as unknown as string),
+        tasks: (d.tasks || []).map((t) => ({
           ...t,
-          createdAt: new Date(t.createdAt as any),
-          updatedAt: new Date(t.updatedAt as any),
+          id: t.id,
+          name: t.name,
+          type: t.type,
+          status: t.status,
+          createdAt: new Date(t.createdAt as unknown as string),
+          updatedAt: new Date(t.updatedAt as unknown as string),
         })),
       }));
     }
