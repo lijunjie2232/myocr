@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import type { AppState, LLMConfig, Directory, Task, TaskType } from '@myocr/types';
 import { dbService, ocrService, summaryService } from '@myocr/ipc-client';
 import { llmConfigService } from '../services/configService';
@@ -93,6 +93,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, []);
 
   // Auto-test all LLM configs after loading
+  const autoTestedConfigsRef = useRef<Set<string>>(new Set());
+  
   useEffect(() => {
     if (isLoaded && !autoTestComplete && state.llmConfigs.length > 0) {
       const autoTestConfigs = async () => {
@@ -100,9 +102,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         
         // Test each config with a delay to avoid overwhelming the network
         for (const config of state.llmConfigs) {
+          // Skip if already tested in this session
+          if (autoTestedConfigsRef.current.has(config.id)) {
+            continue;
+          }
+          
           try {
             console.log(`Testing config: ${config.name}`);
             const result = await llmConfigService.testConnection(config);
+            
+            // Mark as tested
+            autoTestedConfigsRef.current.add(config.id);
             
             // Update config with models if test succeeded
             if (result.success && result.models && result.models.length > 0) {
@@ -132,7 +142,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       
       autoTestConfigs();
     }
-  }, [isLoaded, autoTestComplete, state.llmConfigs]);
+  }, [isLoaded, autoTestComplete, state.llmConfigs.length]);
 
   // Initialize OCR service with API instances when configs change
   useEffect(() => {
