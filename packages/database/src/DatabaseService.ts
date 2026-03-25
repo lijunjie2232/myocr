@@ -35,7 +35,7 @@ export class DatabaseService {
         { createdAt: 'desc' },
       ],
     });
-    
+
     return configs.map(config => ({
       id: config.id,
       name: config.name,
@@ -74,7 +74,7 @@ export class DatabaseService {
     const updateData: { [key: string]: unknown } = {
       updatedAt: new Date(),
     };
-    
+
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.provider !== undefined) updateData.provider = updates.provider;
     if (updates.baseUrl !== undefined) updateData.baseUrl = updates.baseUrl;
@@ -83,7 +83,7 @@ export class DatabaseService {
     if (updates.is_enabled !== undefined) updateData.isEnabled = updates.is_enabled;
     if (updates.sort_order !== undefined) updateData.sortOrder = updates.sort_order;
     if (updates.metadata !== undefined) updateData.metadata = updates.metadata ? JSON.stringify(updates.metadata) : null;
-    
+
     await this.prisma.llmServerApi.update({
       where: { id },
       data: updateData,
@@ -94,9 +94,9 @@ export class DatabaseService {
     const config = await this.prisma.llmServerApi.findUnique({
       where: { id },
     });
-    
+
     if (!config) return undefined;
-    
+
     return {
       id: config.id,
       name: config.name,
@@ -126,7 +126,7 @@ export class DatabaseService {
       this.prisma.summaryDirectory.findMany({ orderBy: { name: 'asc' } }),
       this.prisma.promptDirectory.findMany({ orderBy: { name: 'asc' } }),
     ]);
-    
+
     // Combine and convert to unified format
     return [
       ...ocrDirs.map(d => ({
@@ -166,9 +166,9 @@ export class DatabaseService {
   async getDirectoryWithTasks(directoryId: string): Promise<Directory | null> {
     // First get the directory
     const directory = await this.getDirectory(directoryId);
-    
+
     if (!directory) return null;
-    
+
     // Then load tasks based on directory type
     let tasks: Task[] = [];
     switch (directory.type) {
@@ -182,7 +182,7 @@ export class DatabaseService {
         tasks = await this.getPromptsByDirectory(directoryId);
         break;
     }
-    
+
     return {
       ...directory,
       tasks,
@@ -191,7 +191,7 @@ export class DatabaseService {
 
   async addDirectory(directory: Directory): Promise<void> {
     const now = new Date();
-    
+
     switch (directory.type) {
       case 'ocr':
         await this.prisma.ocrDirectory.create({
@@ -242,7 +242,7 @@ export class DatabaseService {
       description: directory.description ?? null,
       metadata: directory.metadata ? JSON.stringify(directory.metadata) : null,
     };
-    
+
     switch (directory.type) {
       case 'ocr':
         await this.prisma.ocrDirectory.update({
@@ -282,7 +282,7 @@ export class DatabaseService {
         tasks: [],
       };
     }
-    
+
     dir = await this.prisma.summaryDirectory.findUnique({ where: { id } });
     if (dir) {
       return {
@@ -296,7 +296,7 @@ export class DatabaseService {
         tasks: [],
       };
     }
-    
+
     dir = await this.prisma.promptDirectory.findUnique({ where: { id } });
     if (dir) {
       return {
@@ -310,16 +310,16 @@ export class DatabaseService {
         tasks: [],
       };
     }
-    
+
     return undefined;
   }
 
   async deleteDirectory(id: string): Promise<void> {
     // Delete from all directory types (only one will exist)
     await Promise.all([
-      this.prisma.ocrDirectory.delete({ where: { id } }).catch(() => {}),
-      this.prisma.summaryDirectory.delete({ where: { id } }).catch(() => {}),
-      this.prisma.promptDirectory.delete({ where: { id } }).catch(() => {}),
+      this.prisma.ocrDirectory.delete({ where: { id } }).catch(() => { }),
+      this.prisma.summaryDirectory.delete({ where: { id } }).catch(() => { }),
+      this.prisma.promptDirectory.delete({ where: { id } }).catch(() => { }),
     ]);
   }
 
@@ -354,7 +354,7 @@ export class DatabaseService {
       where: { directoryId },
       orderBy: { createdAt: 'desc' },
     });
-    
+
     return prompts.map((prompt) => ({
       id: prompt.id,
       name: prompt.name,
@@ -373,10 +373,10 @@ export class DatabaseService {
   }
 
   async updatePrompt(id: string, updates: Partial<Prompt>): Promise<void> {
-    const updateData: { updatedAt: Date; [key: string]: unknown } = {
+    const updateData: { updatedAt: Date;[key: string]: unknown } = {
       updatedAt: new Date(),
     };
-    
+
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.content !== undefined) updateData.content = updates.content;
     if (updates.type !== undefined) updateData.type = updates.type;
@@ -386,7 +386,7 @@ export class DatabaseService {
     if (updates.isFavorite !== undefined) updateData.isFavorite = updates.isFavorite;
     if (updates.usageCount !== undefined) updateData.usageCount = updates.usageCount;
     if (updates.metadata !== undefined) updateData.metadata = updates.metadata ? JSON.stringify(updates.metadata) : null;
-    
+
     try {
       await this.prisma.prompt.update({
         where: { id },
@@ -421,7 +421,7 @@ export class DatabaseService {
 
   async createOcrTask(task: { id: string; directoryId: string; name: string; status: string; imageData?: string; imageMimeType?: string; imageName?: string; apiConfigId?: string; selectedModel?: string; temperature?: number; maxTokens?: number; customPrompt?: string; metadata?: unknown }): Promise<void> {
     const now = new Date();
-    
+
     // Validate and log image data
     console.log('[DatabaseService] Creating OCR task with image data:', {
       hasImageData: !!task.imageData,
@@ -430,7 +430,7 @@ export class DatabaseService {
       isDataURL: task.imageData?.startsWith('data:'),
       mimeType: task.imageMimeType,
     });
-    
+
     // Ensure imageData is pure base64 (no data URL prefix)
     let pureBase64 = task.imageData;
     if (pureBase64 && typeof pureBase64 === 'string' && pureBase64.startsWith('data:')) {
@@ -438,7 +438,7 @@ export class DatabaseService {
       const commaIndex = pureBase64.indexOf(',');
       pureBase64 = commaIndex > -1 ? pureBase64.substring(commaIndex + 1) : pureBase64;
     }
-    
+
     await this.prisma.ocrTask.create({
       data: {
         id: task.id,
@@ -458,7 +458,7 @@ export class DatabaseService {
         updatedAt: now,
       },
     });
-    
+
     console.log('[DatabaseService] OCR task created successfully');
   }
 
@@ -466,7 +466,7 @@ export class DatabaseService {
     const updateData: { [key: string]: unknown } = {
       updatedAt: new Date(),
     };
-    
+
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.status !== undefined) updateData.status = updates.status;
     if (updates.result !== undefined) updateData.result = updates.result;
@@ -477,7 +477,7 @@ export class DatabaseService {
     if (updates.maxTokens !== undefined) updateData.maxTokens = updates.maxTokens;
     if (updates.customPrompt !== undefined) updateData.customPrompt = updates.customPrompt;
     if (updates.metadata !== undefined) updateData.metadata = updates.metadata ? JSON.stringify(updates.metadata) : null;
-    
+
     try {
       await this.prisma.ocrTask.update({
         where: { id },
@@ -498,7 +498,7 @@ export class DatabaseService {
       where: { directoryId },
       orderBy: { createdAt: 'desc' },
     });
-    
+
     return tasks.map((task) => {
       // Convert blob (Uint8Array) to base64 string properly
       let base64Data = '';
@@ -511,19 +511,19 @@ export class DatabaseService {
           base64Data = Buffer.from(task.imageBlob).toString('base64');
         }
       }
-      
+
       // Remove any existing data URL prefix to avoid duplication
       if (base64Data.startsWith('data:')) {
         const commaIndex = base64Data.indexOf(',');
         base64Data = commaIndex > -1 ? base64Data.substring(commaIndex + 1) : base64Data;
       }
-      
+
       return {
         id: task.id,
         name: task.name,
         type: 'ocr' as const,
         status: task.status,
-        imageUrl: base64Data && task.imageMimeType 
+        imageUrl: base64Data && task.imageMimeType
           ? `data:${task.imageMimeType};base64,${base64Data}`
           : null,
         imageBlob: task.imageBlob,
@@ -578,7 +578,7 @@ export class DatabaseService {
     const updateData: any = {
       updatedAt: new Date(),
     };
-    
+
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.status !== undefined) updateData.status = updates.status;
     if (updates.result !== undefined) updateData.result = updates.result;
@@ -590,7 +590,7 @@ export class DatabaseService {
     if (updates.customPrompt !== undefined) updateData.customPrompt = updates.customPrompt;
     if (updates.resultFormat !== undefined) updateData.resultFormat = updates.resultFormat;
     if (updates.metadata !== undefined) updateData.metadata = updates.metadata ? JSON.stringify(updates.metadata) : null;
-    
+
     try {
       await this.prisma.summaryTask.update({
         where: { id },
@@ -611,7 +611,7 @@ export class DatabaseService {
       where: { directoryId },
       orderBy: { createdAt: 'desc' },
     });
-    
+
     return tasks.map((task: any) => ({
       ...task,
       type: 'summary' as const,
