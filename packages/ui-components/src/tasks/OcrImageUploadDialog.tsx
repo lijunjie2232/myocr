@@ -16,12 +16,14 @@ import {
   Select,
   MenuItem,
   TextField,
+  Tooltip,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ScienceIcon from '@mui/icons-material/Science';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import EditIcon from '@mui/icons-material/Edit';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { useAppContext } from '../context/AppContext';
 import { ocrService } from '@myocr/ipc-client';
 import { fileToDataUrl } from '../utils';
@@ -58,6 +60,8 @@ export default function OcrImageUploadDialog({ open, onClose, directoryId }: Ocr
   const [promptSelectorOpen, setPromptSelectorOpen] = useState(false);
   const [textEditorOpen, setTextEditorOpen] = useState(false);
   const [isSavingPrompt, setIsSavingPrompt] = useState(false);
+  const [isRefreshingModels, setIsRefreshingModels] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
 
   // Get selected API config
   const selectedConfig = useMemo(() => 
@@ -214,6 +218,39 @@ export default function OcrImageUploadDialog({ open, onClose, directoryId }: Ocr
     }
   };
 
+  const handleRefreshModels = async () => {
+    if (!selectedApiId || !selectedConfig) return;
+    
+    setIsRefreshingModels(true);
+    setRefreshMessage(null);
+    
+    try {
+      // Import llmConfigService dynamically
+      const { llmConfigService } = await import('../services/configService');
+      const result = await llmConfigService.testConnection(selectedConfig);
+      
+      if (result.success && result.models) {
+        // Update state to reflect new models
+        setSelectedModel(''); // Reset model selection
+        
+        // Show success message
+        setRefreshMessage(`Successfully refreshed! Found ${result.models.length} models.`);
+        
+        // Clear message after 3 seconds
+        setTimeout(() => setRefreshMessage(null), 3000);
+      } else {
+        setRefreshMessage('No models found or connection failed.');
+        setTimeout(() => setRefreshMessage(null), 3000);
+      }
+    } catch (error) {
+      console.error('Failed to refresh models:', error);
+      setRefreshMessage('Failed to refresh models. Please check your connection.');
+      setTimeout(() => setRefreshMessage(null), 3000);
+    } finally {
+      setIsRefreshingModels(false);
+    }
+  };
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle>
@@ -343,19 +380,35 @@ export default function OcrImageUploadDialog({ open, onClose, directoryId }: Ocr
               {/* Model Selection */}
               {selectedConfig && selectedConfig.models && selectedConfig.models.length > 0 && (
                 <FormControl fullWidth sx={{ mb: 2 }}>
-                  <InputLabel>Model</InputLabel>
-                  <Select
-                    value={selectedModel}
-                    label="Model"
-                    onChange={(e) => setSelectedModel(e.target.value)}
-                  >
-                    <MenuItem value="auto">Auto</MenuItem>
-                    {selectedConfig.models.map((model) => (
-                      <MenuItem key={model} value={model}>
-                        {model}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Select
+                      value={selectedModel}
+                      label="Model"
+                      onChange={(e) => setSelectedModel(e.target.value)}
+                      sx={{ flexGrow: 1 }}
+                    >
+                      <MenuItem value="auto">Auto</MenuItem>
+                      {selectedConfig.models.map((model) => (
+                        <MenuItem key={model} value={model}>
+                          {model}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    <Tooltip title="Refresh model list">
+                      <IconButton 
+                        onClick={handleRefreshModels} 
+                        size="small"
+                        disabled={isRefreshingModels}
+                      >
+                        <RefreshIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                  {refreshMessage && (
+                    <Alert severity={refreshMessage.includes('Successfully') ? 'success' : 'warning'} sx={{ mt: 1, py: 0.5 }}>
+                      {refreshMessage}
+                    </Alert>
+                  )}
                 </FormControl>
               )}
             </>

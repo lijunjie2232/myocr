@@ -20,6 +20,7 @@ import {
 import ScienceIcon from '@mui/icons-material/Science';
 import EditIcon from '@mui/icons-material/Edit';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { useAppContext } from '../context/AppContext';
 import TextEditor from './TextEditor';
 import PromptTemplateSelectorDialog from './PromptTemplateSelectorDialog';
@@ -66,6 +67,10 @@ export default function SummaryTaskConfigDialog({
 
   // Prompt template selection
   const [promptSelectorOpen, setPromptSelectorOpen] = useState(false);
+  
+  // Refresh state
+  const [isRefreshingModels, setIsRefreshingModels] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
 
   // Get selected API config
   const selectedConfig = useMemo(() => 
@@ -166,6 +171,39 @@ export default function SummaryTaskConfigDialog({
     setPromptSelectorOpen(false);
   };
 
+  const handleRefreshModels = async () => {
+    if (!selectedApiId || !selectedConfig) return;
+    
+    setIsRefreshingModels(true);
+    setRefreshMessage(null);
+    
+    try {
+      // Import llmConfigService dynamically
+      const { llmConfigService } = await import('../services/configService');
+      const result = await llmConfigService.testConnection(selectedConfig);
+      
+      if (result.success && result.models) {
+        // Update state to reflect new models
+        setSelectedModel(''); // Reset model selection
+        
+        // Show success message
+        setRefreshMessage(`Successfully refreshed! Found ${result.models.length} models.`);
+        
+        // Clear message after 3 seconds
+        setTimeout(() => setRefreshMessage(null), 3000);
+      } else {
+        setRefreshMessage('No models found or connection failed.');
+        setTimeout(() => setRefreshMessage(null), 3000);
+      }
+    } catch (error) {
+      console.error('Failed to refresh models:', error);
+      setRefreshMessage('Failed to refresh models. Please check your connection.');
+      setTimeout(() => setRefreshMessage(null), 3000);
+    } finally {
+      setIsRefreshingModels(false);
+    }
+  };
+
   if (!task) return null;
 
   return (
@@ -224,18 +262,34 @@ export default function SummaryTaskConfigDialog({
           {/* Model Selection - Model is now stored per-task */}
           {selectedConfig && selectedConfig.models && selectedConfig.models.length > 0 && (
             <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Model</InputLabel>
-              <Select
-                value={selectedModel}
-                label="Model"
-                onChange={(e) => setSelectedModel(e.target.value)}
-              >
-                {selectedConfig.models.map((model) => (
-                  <MenuItem key={model} value={model}>
-                    {model}
-                  </MenuItem>
-                ))}
-              </Select>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Select
+                  value={selectedModel}
+                  label="Model"
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  sx={{ flexGrow: 1 }}
+                >
+                  {selectedConfig.models.map((model) => (
+                    <MenuItem key={model} value={model}>
+                      {model}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Tooltip title="Refresh model list">
+                  <IconButton 
+                    onClick={handleRefreshModels} 
+                    size="small"
+                    disabled={isRefreshingModels}
+                  >
+                    <RefreshIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+              {refreshMessage && (
+                <Alert severity={refreshMessage.includes('Successfully') ? 'success' : 'warning'} sx={{ mt: 1, py: 0.5 }}>
+                  {refreshMessage}
+                </Alert>
+              )}
             </FormControl>
           )}
 
