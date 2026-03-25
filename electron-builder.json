@@ -6,19 +6,42 @@
   },
   "files": [
     "apps/dist/**/*",
-    "apps/desktop/dist/*"
+    "apps/desktop/dist/*",
+    "app/localization/!(locales)",
+    "**/prisma/**/*",
+    "**/resources/**/*",
+    "**/node_modules/@prisma/**/*",
+    "**/node_modules/prisma/**/*"
+    // @prisma is not needed in the packed app unless using prisma migrate
+    // "!**/node_modules/@prisma/engines/schema-engine*",
+    // "!**/node_modules/@prisma/engines/prisma-fmt*",
+    // "!**/node_modules/@prisma/engines/query_engine-*",
+    // "!**/node_modules/@prisma/engines/libquery_engine*",
+    // "!**/node_modules/prisma/query_engine*",
+    // "!**/node_modules/prisma/libquery_engine*",
+    // "!**/node_modules/prisma/libquery_engine*",
+    // "!**/node_modules/prisma/**/*.mjs"
   ],
-  "win": {
-    "target": [
-      "nsis",
-      "portable"
-    ]
-  },
-  "linux": {
-    "target": [
-      "AppImage",
-      "tar.gz"
-    ],
-    "category": "Utility"
-  }
+  "extraFiles": [
+    "app/localization/locales/**/*"
+  ],
+  "extraResources": [
+    "node_modules/@prisma/engines/schema-engine*",
+    "node_modules/@prisma/engines/query*",
+    "node_modules/@prisma/engines/libquery*",
+    "THIRD-PARTY-LICENSES.txt"
+  ]//,
+  // "win": {
+  //   "target": [
+  //     "nsis",
+  //     "portable"
+  //   ]
+  // },
+  // "linux": {
+  //   "target": [
+  //     "AppImage",
+  //     "tar.gz"
+  //   ],
+  //   "category": "Utility"
+  // }
 }
