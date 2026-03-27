@@ -236,10 +236,10 @@ CREATE TABLE IF NOT EXISTS app_settings (
 
 -- Insert default settings
 INSERT INTO app_settings (key, value, description) VALUES 
-  ('active_llm_api_id', 'null', '当前激活的 LLM API ID'),
-  ('active_directory_id', 'null', '当前激活的目录 ID'),
-  ('active_directory_type', 'null', '当前目录类型：ocr/summary/prompt'),
-  ('app_version', '"1.0.0"', '应用版本号');
+  ('active_llm_api_id', 'null', '現在アクティブな LLM API ID'),
+  ('active_directory_id', 'null', '現在アクティブなディレクトリ ID'),
+  ('active_directory_type', 'null', '現在のディレクトリタイプ：ocr/summary/prompt'),
+  ('app_version', '"1.0.0"', 'アプリケーションバージョン');
 
 -- ----------------------------------------------------------------------------
 
