@@ -5,7 +5,7 @@ import type { AppState, LLMConfig, Directory, ElectronAPI } from "@myocr/types";
 
 class DatabaseIPCClient {
   /**
-   * 检查是否在 Electron 环境中运行
+   * Electron 環境で実行されているかを確認
    */
   private isElectron(): boolean {
     return !!(window && (window as Window & typeof globalThis & { electronAPI?: ElectronAPI }).electronAPI);

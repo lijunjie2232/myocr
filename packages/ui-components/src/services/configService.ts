@@ -59,7 +59,7 @@ export const llmConfigService = {
   },
 
   /**
-   * 测试 LLM API 连接
+   * LLM API 接続をテスト
    */
   async testConnection(config: LLMConfig): Promise<{ success: boolean; message: string; models?: string[] }> {
     try {
@@ -87,7 +87,7 @@ export const llmConfigService = {
   },
 
   /**
-   * 测试 Ollama API
+   * Ollama API をテスト
    */
   async testOllama(url: string, _apiKey: string): Promise<{ success: boolean; message: string; models?: string[] }> { // eslint-disable-line @typescript-eslint/no-unused-vars
     try {
@@ -116,7 +116,7 @@ export const llmConfigService = {
   },
 
   /**
-   * 测试 OpenAI 兼容 API
+   * OpenAI 互換 API をテスト
    */
   async testOpenAI(url: string, apiKey: string): Promise<{ success: boolean; message: string; models?: string[] }> {
     // Test by fetching models
@@ -148,7 +148,7 @@ export const llmConfigService = {
   },
 
   /**
-   * 测试 Anthropic API
+   * Anthropic API をテスト
    */
   async testAnthropic(url: string, apiKey: string): Promise<{ success: boolean; message: string; models?: string[] }> {
     // Anthropic doesn't have a models endpoint, so we'll use a simple request
@@ -185,7 +185,7 @@ export const llmConfigService = {
   },
 
   /**
-   * 测试自定义 API
+   * カスタム API をテスト
    */
   async testCustom(url: string, apiKey: string): Promise<{ success: boolean; message: string; models?: string[] }> {
     // Try common endpoints

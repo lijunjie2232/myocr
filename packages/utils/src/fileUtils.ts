@@ -1,5 +1,5 @@
 /**
- * 下载文本内容为文件
+ * テキストコンテンツをファイルとしてダウンロード
  */
 export const downloadTextFile = (content: string, filename: string): void => {
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
@@ -14,7 +14,7 @@ export const downloadTextFile = (content: string, filename: string): void => {
 };
 
 /**
- * 复制文本到剪贴板
+ * テキストをクリップボードにコピー
  */
 export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
@@ -27,7 +27,7 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
 };
 
 /**
- * 从 File 对象读取为 Data URL
+ * File オブジェクトを Data URL として読み取る
  */
 export const fileToDataUrl = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -39,14 +39,14 @@ export const fileToDataUrl = (file: File): Promise<string> => {
 };
 
 /**
- * 生成唯一的 ID
+ * 一意の ID を生成
  */
 export const generateId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
 /**
- * 格式化日期时间
+ * 日付時刻をフォーマット
  */
 export const formatDateTime = (date: Date): string => {
   return date.toLocaleString('zh-CN', {
@@ -60,7 +60,7 @@ export const formatDateTime = (date: Date): string => {
 };
 
 /**
- * 验证文件是否为图片
+ * ファイルが画像かどうかを検証
  */
 export const isImageFile = (file: File): boolean => {
   return file.type.startsWith('image/');
