@@ -13,10 +13,10 @@
     "postinstall": "electron-rebuild",
     "electron:dev": "concurrently \"cross-env BROWSER=none npm run dev\" \"wait-on http://localhost:5173 && npm run electron:build-dev && cross-env NODE_ENV=development electron .\"",
     "electron:build-dev": "cd apps/desktop && node build.config.js",
-    "electron:build": "npm run build:prod && electron-builder",
-    "electron:build:win": "npm run build:prod && electron-builder --win",
-    "electron:build:mac": "npm run build:prod && electron-builder --mac",
-    "electron:build:linux": "npm run build:prod && electron-builder --linux",
+    "electron:build": "npm run build:prod && npm run electron:build-dev && electron-builder",
+    "electron:build:win": "npm run build:prod && npm run electron:build-dev && electron-builder --win",
+    "electron:build:mac": "npm run build:prod && npm run electron:build-dev && electron-builder --mac",
+    "electron:build:linux": "npm run build:prod && npm run electron:build-dev && electron-builder --linux",
     "rebuild": "electron-rebuild"
   },
   "dependencies": {
