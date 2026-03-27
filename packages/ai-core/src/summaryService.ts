@@ -87,80 +87,57 @@ class SummaryServiceClass {
       // Create new LangChain agent for this request
       const agent = await this.createAgent(llmConfig, request);
       
-      // Prepare input text with optional chunking
-      const inputText = await this.prepareInputText(request.text, request.textSplitConfig);
+      // Prepare input text with chunking - returns array of chunks
+      const chunks = await this.prepareInputText(request.text, request.textSplitConfig);
       
-      // Build the user message
+      // Process each chunk with agent chat and concat results
+      let summaryText = '';
       const customPrompt = request.prompt || 'Please provide a concise summary of the following text, highlighting the main points and key insights.';
-      const userMessage = `${customPrompt}\n\nText to summarize:\n${inputText}`;
       
       // Use task ID as thread ID if provided, otherwise generate a temporary one
       const threadId = request.taskId || `summary-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       
-      // Log complete agent configuration before invoke
-      console.log('[SummaryService] === Agent Invoke Configuration ===', {
-        timestamp: new Date().toISOString(),
-        requestId: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        taskId: request.taskId || 'none',
-        threadId: threadId,
-        llmConfig: {
-          provider: llmConfig.provider,
-          model: request.modelId || llmConfig.model,
-          baseUrl: llmConfig.baseUrl ? `${llmConfig.baseUrl.substring(0, 20)}...` : 'default',
-          hasApiKey: !!llmConfig.apiKey,
-        },
-        modelParameters: {
-          temperature: request.temperature ?? 0.7,
-          maxTokens: request.maxTokens && request.maxTokens > 0 ? request.maxTokens : 'unlimited',
-        },
-        memoryConfig: {
-          usage: request.memoryUsage || 'none',
-          trigger: request.memoryConfig?.trigger,
-          keep: request.memoryConfig?.keep,
-        },
-        inputConfig: {
-          textLength: request.text.length,
-          inputTextLength: inputText.length,
-          textSplitConfig: request.textSplitConfig || 'auto',
-        },
-        outputConfig: {
-          resultFormat: request.resultFormat || 'plaintext',
-          useStructuredResponse: true,
-        },
-        prompt: {
-          custom: !!request.prompt,
-          preview: customPrompt.substring(0, 100) + (customPrompt.length > 100 ? '...' : ''),
-        },
-        invokeConfig: {
-          messages: [{ role: 'user', contentLength: userMessage.length }],
-          configurable: { thread_id: threadId },
-        },
-      });
-      
-      // Invoke agent with config containing thread_id
-      const result = await agent.invoke(
-        {
-          messages: [{ role: "user" as const, content: userMessage }]
-        },
-        {
-          configurable: {
-            thread_id: threadId
+      // Process each chunk sequentially
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        const userMessage = `${customPrompt}\n\nText to summarize:\n${chunk}`;
+        
+        console.log(`[SummaryService] Processing chunk ${i + 1}/${chunks.length}, length: ${chunk.length}`);
+        
+        // Create new LangChain agent for each chunk
+        // const agent = await this.createAgent(llmConfig, request);
+        
+        // Invoke agent with config containing thread_id
+        const result = await agent.invoke(
+          {
+            messages: [{ role: "user" as const, content: userMessage }]
+          },
+          {
+            configurable: {
+              thread_id: threadId
+            }
           }
+        );
+        
+        // Extract response for this chunk
+        let chunkSummary: string;
+        if (result.structuredResponse) {
+          // Use structured response if available
+          const structured = result.structuredResponse as { summary: string; keyPoints?: unknown[] };
+          chunkSummary = this.formatStructuredResponse(structured, request.resultFormat);
+        } else {
+          // Fall back to last AI message
+          const lastMessage = result.messages[result.messages.length - 1];
+          chunkSummary = typeof lastMessage.content === 'string' 
+            ? lastMessage.content 
+            : JSON.stringify(lastMessage.content);
         }
-      );
-      
-      // Extract response
-      let summaryText: string;
-      if (result.structuredResponse) {
-        // Use structured response if available
-        const structured = result.structuredResponse as { summary: string; keyPoints?: unknown[] };
-        summaryText = this.formatStructuredResponse(structured, request.resultFormat);
-      } else {
-        // Fall back to last AI message
-        const lastMessage = result.messages[result.messages.length - 1];
-        summaryText = typeof lastMessage.content === 'string' 
-          ? lastMessage.content 
-          : JSON.stringify(lastMessage.content);
+        
+        // Concatenate chunk summaries
+        if (i > 0) {
+          summaryText += '\n\n---\n\n';
+        }
+        summaryText += chunkSummary;
       }
       
       return {
@@ -185,13 +162,13 @@ class SummaryServiceClass {
   /**
    * Prepare input text with optional chunking
    */
-  private async prepareInputText(text: string, splitConfig?: { chunkSize: number; chunkOverlap: number }): Promise<string> {
-    // If text is short enough or no split config, return as-is
-    if (!splitConfig || text.length <= splitConfig.chunkSize) {
-      return text;
+  private async prepareInputText(text: string, splitConfig?: { chunkSize: number; chunkOverlap: number }): Promise<string[]> {
+    // If no split config, return as single chunk
+    if (!splitConfig) {
+      return [text];
     }
 
-    // Split text into chunks
+    // Split text into chunks using RecursiveCharacterTextSplitter
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: splitConfig.chunkSize,
       chunkOverlap: splitConfig.chunkOverlap,
@@ -199,9 +176,8 @@ class SummaryServiceClass {
 
     const chunks = await splitter.splitText(text);
     
-    // For now, just concatenate chunks back (can be enhanced with smarter selection)
-    // In future, could implement relevance-based chunk selection
-    return chunks.join('\n\n---\n\n');
+    // Return array of chunks
+    return chunks;
   }
 
   /**
