@@ -1,16 +1,16 @@
-# @myocr/utils 快速参考
+# @myocr/utils クイックリファレンス
 
-## 📦 安装
+## 📦 インストール
 
-在 monorepo 中，工具包已经包含在 workspace 中。运行以下命令确保依赖已安装：
+モノレポでは、ユーティリティパッケージはワークスペースに含まれています。依存関係がインストールされていることを確認するために、以下を実行してください：
 
 ```bash
 pnpm install -w
 ```
 
-## 🚀 使用示例
+## 🚀 使用例
 
-### 基础导入
+### 基本インポート
 
 ```typescript
 import { 
@@ -23,19 +23,19 @@ import {
 } from '@myocr/utils';
 ```
 
-### 函数说明
+### 関数の説明
 
 #### `downloadTextFile(content: string, filename: string)`
 
-下载文本内容为文件。
+テキストコンテンツをファイルとしてダウンロードします。
 
 ```typescript
-// 导出为 TXT 文件
+// TXT ファイルとしてエクスポート
 const exportData = (data: string) => {
   downloadTextFile(data, 'export.txt');
 };
 
-// 导出 JSON
+// JSON をエクスポート
 const exportJSON = (obj: object, filename: string) => {
   const json = JSON.stringify(obj, null, 2);
   downloadTextFile(json, filename);
@@ -44,18 +44,18 @@ const exportJSON = (obj: object, filename: string) => {
 
 #### `copyToClipboard(text: string): Promise<boolean>`
 
-复制文本到剪贴板。
+テキストをクリップボードにコピーします。
 
 ```typescript
-// 复制文本
+// テキストをコピー
 const handleCopy = async () => {
   const success = await copyToClipboard('Hello World');
   if (success) {
-    console.log('复制成功！');
+    console.log('コピー成功！');
   }
 };
 
-// 复制 OCR 结果
+// OCR 結果をコピー
 const copyOCRResult = async (result: string) => {
   await copyToClipboard(result);
 };
@@ -63,10 +63,10 @@ const copyOCRResult = async (result: string) => {
 
 #### `fileToDataUrl(file: File): Promise<string>`
 
-将 File 对象转换为 Data URL（Base64）。
+File オブジェクトを Data URL（Base64）に変換します。
 
 ```typescript
-// 处理图片上传
+// 画像アップロードを処理
 const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
   const file = event.target.files?.[0];
   if (file) {
@@ -76,7 +76,7 @@ const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
   }
 };
 
-// 预览图片
+// 画像をプレビュー
 const PreviewImage = ({ file }: { file: File }) => {
   const [preview, setPreview] = useState('');
   
@@ -90,63 +90,63 @@ const PreviewImage = ({ file }: { file: File }) => {
 
 #### `generateId(): string`
 
-生成唯一的 ID。
+一意の ID を生成します。
 
 ```typescript
-// 创建任务 ID
+// タスク ID を作成
 const taskId = generateId();
-// 示例输出："1710832800000-abc123def"
+// 例："1710832800000-abc123def"
 
-// 创建临时文件 ID
+// 一時ファイル ID を作成
 const tempFileId = generateId();
 ```
 
 #### `formatDateTime(date: Date): string`
 
-格式化日期时间（中文格式）。
+日付時刻をフォーマットします（中国語形式）。
 
 ```typescript
-// 格式化当前时间
+// 現在時刻をフォーマット
 const now = formatDateTime(new Date());
-// 输出："2024/03/19 10:30:45"
+// 出力："2024/03/19 10:30:45"
 
-// 格式化任务创建时间
+// タスク作成時間をフォーマット
 const taskTime = formatDateTime(task.createdAt);
 ```
 
 #### `isImageFile(file: File): boolean`
 
-验证文件是否为图片。
+ファイルが画像かどうかを検証します。
 
 ```typescript
-// 文件上传验证
+// ファイルアップロードを検証
 const handleFileSelect = (file: File) => {
   if (!isImageFile(file)) {
-    alert('请选择图片文件');
+    alert('画像ファイルを選択してください');
     return;
   }
-  // 继续处理图片
+  // 画像を処理し続ける
 };
 
-// 过滤图片文件
+// 画像ファイルをフィルタリング
 const imageFiles = files.filter(isImageFile);
 ```
 
-## 💡 实际应用场景
+## 💡 実際の使用シナリオ
 
-### OCR 图片上传
+### OCR 画像アップロード
 
 ```typescript
 import { fileToDataUrl, generateId, downloadTextFile } from '@myocr/utils';
 
 const handleImageUpload = async (file: File) => {
-  // 1. 生成唯一 ID
+  // 1. 一意の ID を生成
   const taskId = generateId();
   
-  // 2. 转换为 Base64
+  // 2. Base64 に変換
   const imageData = await fileToDataUrl(file);
   
-  // 3. 创建任务
+  // 3. タスクを作成
   await createTask({
     id: taskId,
     name: file.name,
@@ -154,13 +154,13 @@ const handleImageUpload = async (file: File) => {
     type: 'ocr',
   });
   
-  // 4. OCR 完成后导出结果
+  // 4. OCR 完了後、結果をエクスポート
   const result = await performOCR(imageData);
   downloadTextFile(result.text, `${file.name}-ocr-result.txt`);
 };
 ```
 
-### 批量导出
+### バッチエクスポート
 
 ```typescript
 import { downloadTextFile, formatDateTime } from '@myocr/utils';
@@ -175,7 +175,7 @@ const exportAllTasks = (tasks: Task[]) => {
 };
 ```
 
-### 复制到剪贴板
+### クリップボードにコピー
 
 ```typescript
 import { copyToClipboard } from '@myocr/utils';
@@ -184,80 +184,80 @@ const ResultCard = ({ result }: { result: string }) => {
   const handleCopy = async () => {
     const success = await copyToClipboard(result);
     if (success) {
-      // 显示成功提示
-      toast.success('已复制到剪贴板');
+      // 成功メッセージを表示
+      toast.success('クリップボードにコピーしました');
     }
   };
   
   return (
     <Box>
       <Typography>{result}</Typography>
-      <Button onClick={handleCopy}>复制</Button>
+      <Button onClick={handleCopy}>コピー</Button>
     </Box>
   );
 };
 ```
 
-## ⚠️ 注意事项
+## ⚠️ 注意事項
 
-### 浏览器环境限制
+### ブラウザ環境の制限
 
-以下函数**仅在浏览器环境**中可用：
+以下の関数は**ブラウザ環境のみ**で利用可能です：
 
-- `downloadTextFile()` - 使用 DOM API
-- `copyToClipboard()` - 使用 Clipboard API
-- `fileToDataUrl()` - 使用 FileReader API
+- `downloadTextFile()` - DOM API を使用
+- `copyToClipboard()` - Clipboard API を使用
+- `fileToDataUrl()` - FileReader API を使用
 
-在 Node.js/Electron 主进程中使用时需要特别注意：
+Node.js/Electron メインプロセスで使用する場合の注意：
 
 ```typescript
-// ❌ 错误：在 Electron 主进程中使用
+// ❌ エラー：Electron メインプロセスで使用
 const { downloadTextFile } = await import('@myocr/utils');
-downloadTextFile('test', 'test.txt'); // 会失败
+downloadTextFile('test', 'test.txt'); // 失敗します
 
-// ✅ 正确：在渲染进程或 React 组件中使用
+// ✅ 正解：レンダリングプロセスまたは React コンポーネントで使用
 const handleDownload = () => {
-  downloadTextFile('test', 'test.txt'); // 正常工作
+  downloadTextFile('test', 'test.txt'); // 正常に動作します
 };
 ```
 
-### TypeScript 类型
+### TypeScript タイプ
 
-所有函数都有完整的 TypeScript 类型定义，无需额外声明类型。
+すべての関数には完全な TypeScript タイプ定義があり、追加の宣言は不要です。
 
 ```typescript
-// ✅ 自动推断类型
+// ✅ 自動的にタイプを推論
 const url = await fileToDataUrl(file); // string
 const success = await copyToClipboard(text); // boolean
 ```
 
-## 📊 性能提示
+## 📊 パフォーマンスヒント
 
-### 大文件处理
+### 大ファイル処理
 
 ```typescript
-// ✅ 推荐：使用异步方式处理多个文件
+// ✅ 推奨：複数のファイルを非同期で処理
 const processMultipleFiles = async (files: File[]) => {
   const promises = files.map(file => fileToDataUrl(file));
   const results = await Promise.all(promises);
   return results;
 };
 
-// ❌ 不推荐：同步循环会导致性能问题
+// ❌ 非推奨：同期ループはパフォーマンスの問題を引き起こす可能性があります
 const results = [];
 for (const file of files) {
-  results.push(await fileToDataUrl(file)); // 串行处理，慢
+  results.push(await fileToDataUrl(file)); // 逐次処理、遅い
 }
 ```
 
-### 内存管理
+### メモリ管理
 
 ```typescript
-// 及时清理 Object URLs
+// Object URLs をタイムリーにクリーンアップ
 const previewUrl = URL.createObjectURL(file);
 // ... 使用 previewUrl
 
-// 不再需要时清理
+// 不要になったらクリーンアップ
 URL.revokeObjectURL(previewUrl);
 ```
 
